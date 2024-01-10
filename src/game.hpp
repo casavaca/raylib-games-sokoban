@@ -45,25 +45,10 @@ public:
     };
 
 public:
-    void LoadDefaultLevel() {
-        state = convertFromTxt({
-                "_####__",
-                "_# .#__",
-                "_#  ###",
-                "_#*@  #",
-                "##  $ #",
-                "#   ###",
-                "#####__",
-            });
-        for (int i=0; i<state.size(); i++) {
-            for (int j=0; j<state[i].size(); j++) {
-                if(state[i][j] & TILE_PLAYER) {
-                    playerPos = Pos{j, i};
-                }
-            }
-        }
-    }
+    bool LoadLevel(const std::vector<std::string>& lines);
+    bool LoadDefaultLevel();
     const State& GetState() const { return state; }
+    void Restart  () {}
     void PushNorth() {}
     void PushSouth() {}
     void PushEast () {}
@@ -74,7 +59,7 @@ public:
 private:
     Pos   playerPos;
     State state;
-
+    std::vector<std::string> level;
     // helper functions.
     void Teleport(int nrow, int ncol) {
         int M = state.size();
@@ -87,22 +72,5 @@ private:
             playerPos.y = nrow;
             playerPos.x = ncol;
         }
-    }
-
-    State convertFromTxt(const std::vector<std::string>& lines) {
-#if defined(DEBUG)
-        assert(lines.size());
-        auto nCol = std::max_element(lines.begin(), lines.end(), [](auto a,auto b){return a.size()<b.size();})->size();
-        for (auto &s:lines) {
-            assert(s.find_first_of("#") != s.npos);
-            assert(s.size() == nCol);
-        }
-#endif
-        State ret;
-        for (auto s:lines) {
-            ret.emplace_back();
-            std::transform(s.begin(), s.end(), std::back_inserter(ret.back()), [](char c){return txtMap[c];});
-        }
-        return ret;
     }
 };

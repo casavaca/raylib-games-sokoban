@@ -1,0 +1,27 @@
+#include "game_config.hpp"
+
+#include <algorithm>
+
+namespace GameConfig {
+
+enum { Up, Down, Right, Left, Restart, NUM_BINDINGS };
+
+static Binding bindings[NUM_BINDINGS] {
+    [Up     ] = {KEY_UP   , KEY_I, KEY_W, KEY_NULL},
+    [Down   ] = {KEY_DOWN , KEY_K, KEY_S, KEY_NULL},
+    [Right  ] = {KEY_RIGHT, KEY_L, KEY_D, KEY_NULL},
+    [Left   ] = {KEY_LEFT , KEY_J, KEY_A, KEY_NULL},
+    [Restart] = {KEY_R},
+};
+
+static bool Contain(Binding b, int key) {
+    return std::find(b.begin(), b.end(), key) != b.end();
+}
+
+bool IsUp     (int key) { return Contain(bindings[Up],      key); }
+bool IsDown   (int key) { return Contain(bindings[Down],    key); }
+bool IsRight  (int key) { return Contain(bindings[Right],   key); }
+bool IsLeft   (int key) { return Contain(bindings[Left],    key); }
+bool IsRestart(int key) { return Contain(bindings[Restart], key); }
+
+}

@@ -3,6 +3,7 @@
 
 #include "game.hpp"
 #include "game_gui.hpp"
+#include "game_config.hpp"
 
 int main() {
 
@@ -36,8 +37,14 @@ int main() {
             IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
             auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
             game.Click(nrow, ncol);
-        } else if (auto c = GetKeyPressed()) {
-            // TODO;
+        } else if (auto key = GetKeyPressed()) {
+            if (GameConfig::IsUp     (key)) { game.PushNorth(); }
+            if (GameConfig::IsDown   (key)) { game.PushSouth(); }
+            if (GameConfig::IsRight  (key)) { game.PushEast (); }
+            if (GameConfig::IsLeft   (key)) { game.PushWest (); }
+            if (GameConfig::IsRestart(key)) { game.Restart  (); }
+        } else {
+            // TODO: no need to redraw?
         }
  
         //----------------------------------------------------------------------------------
