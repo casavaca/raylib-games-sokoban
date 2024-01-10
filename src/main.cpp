@@ -10,6 +10,10 @@
 #include "raylib-cpp.hpp"
 #include "raylib.h"
 
+struct Pos {
+    int x,y;
+};
+
 class Sokoban {
     // Types
     enum TileType {
@@ -52,15 +56,12 @@ public:
                 "#   ###",
                 "#####__",
             });
-        for (auto i=0; const auto & vc : state) {
-            for (auto j=0; const auto c : vc) {
-                if(c & TILE_PLAYER) {
-                    playerPos.y = i;
-                    playerPos.x = j;
+        for (int i=0; i<state.size(); i++) {
+            for (int j=0; j<state[i].size(); j++) {
+                if(state[i][j] & TILE_PLAYER) {
+                    playerPos = Pos{j, i};
                 }
-                j++;
             }
-            i++;
         }
         std::cout << playerPos.y << std::endl;
         std::cout << playerPos.x << std::endl;
@@ -91,19 +92,18 @@ public:
     }
     void Draw() {
         const int blockPixels = basePng[TILE_NULL].GetWidth();
-        for (auto i=0; const auto & vc : state) {
-            for (auto j=0; const auto c : vc) {
+        for (int i=0; i<state.size(); i++) {
+            for (int j=0; j<state[i].size(); j++) {
+                auto c = state[i][j];
                 for (auto png:pngs[c]) {
                     png->Draw(j*blockPixels, i*blockPixels);
                 }
-                j++;
             }
-            i++;
         }
     }
     void HandleKeyPressed(int c) {
-        int prow = static_cast<int>(playerPos.y);
-        int pcol = static_cast<int>(playerPos.x);
+        int prow = playerPos.y;
+        int pcol = playerPos.x;
         switch (c) {
         case KEY_UP:    return Teleport(prow-1, pcol);
         case KEY_DOWN:  return Teleport(prow+1, pcol);
@@ -122,7 +122,7 @@ public:
         return {state.size(), state[0].size()};
     }
 private:
-    Vector2 playerPos;
+    Pos   playerPos;
     State state;
     std::unordered_map<uint8_t, raylib::Texture> basePng;
     std::unordered_map<uint8_t, std::vector<raylib::Texture*>> pngs;
@@ -130,8 +130,8 @@ private:
     // helper functions.
     void Teleport(int nrow, int ncol) {
         try {
-            int prow = static_cast<int>(playerPos.y);
-            int pcol = static_cast<int>(playerPos.x);
+            int prow = playerPos.y;
+            int pcol = playerPos.x;
             state.at(nrow).at(ncol) = TILE_PLAYER;
             state.at(prow).at(pcol) = TILE_SPACE;
             playerPos.y = nrow;
