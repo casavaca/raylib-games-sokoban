@@ -31,7 +31,12 @@ file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp")
 # Define SOURCES as a list of all source files
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+target_compile_options(${PROJECT_NAME} PRIVATE "-Wno-c99-designator")
 target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp)
+
+if(CMAKE_BUILD_TYPE MATCHES [Dd][Ee][Bb][Uu][Gg])
+    target_compile_options(${PROJECT_NAME} PRIVATE "-DDEBUG")
+endif()
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
