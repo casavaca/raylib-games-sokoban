@@ -62,5 +62,6 @@ if (${PLATFORM} STREQUAL "Web")
     # Required linker flags for using Raylib with Emscripten
     target_link_options(${PROJECT_NAME} PRIVATE --preload-file assets)
     target_link_options(${PROJECT_NAME} PRIVATE -sASSERTIONS=1 -sASYNCIFY -sGL_ENABLE_GET_PROC_ADDRESS=1)
+    target_link_options(${PROJECT_NAME} PRIVATE --shell-file ${PROJECT_SOURCE_DIR}/src/template.html)
     target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
 endif()
