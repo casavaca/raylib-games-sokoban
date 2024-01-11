@@ -31,6 +31,7 @@ enum TileType : uint8_t {
 
     TILE_BOX              = 0x20,
     TILE_SPACE            = 0x0,
+    TILE_SPACE_MASK       = 0x28,
 
     TILE_TARGET           = 0x10,
 
@@ -77,15 +78,17 @@ private:
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
     int  GetSubtype(Pos p) const {return state[p.row][p.col] & 3; }
-    bool IsBlocked(Pos p) const {return InBound(p) && (Get(p) & TILE_BLOCKED); }
-    bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_WALL);    }
-    bool IsSpace  (Pos p) const {return InBound(p) && !IsBlocked(p) && !IsBox(p); }
+    bool IsBlocked(Pos p) const {return InBound(p) && (Get(p) & TILE_BLOCKED);     }
+    bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_WALL);        }
+    bool IsSpace  (Pos p) const {return InBound(p) && !(Get(p) & TILE_SPACE_MASK); }
     bool InBound(Pos p) const {return InBound(p.row, p.col); }
     bool InBound(int row, int col) const {
         int M = state.size();
         int N = state[0].size();
         return (row >= 0 && row < M && col >= 0 && col < N);
     }
+    void ClearPlayerPos();
+    void SetPlayerPos(Pos p, int dy, int dx);
 private:
     Pos   playerPos;
     State state;

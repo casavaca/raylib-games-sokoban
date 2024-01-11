@@ -85,19 +85,29 @@ void Sokoban::Push(int dy, int dx) {
     case TILE_BOX:
     case TILE_BOX_ON_TARGET: {
         Pos tmp = newPos + dp;
-        if (IsSpace(tmp)) {
-            Get(tmp)    |= TILE_BOX;
-            Get(newPos) &= ~TILE_BOX;
-        }
+        if (!IsSpace(tmp))
+            return SetPlayerPos(playerPos, dy,dx);
+        Get(tmp)    |= TILE_BOX;
+        Get(newPos) &= ~TILE_BOX;
     } // FALLTHROUGH
     case TILE_SPACE:
     case TILE_TARGET:
-        Get(playerPos) &= ~TILE_PLAYER;
-        Get(playerPos) &= ~3;
-        Get(newPos)    |= TILE_PLAYER;
-        Get(newPos)    &= ~3;
-        Get(newPos)    |= (dy ? (1-dy) : (2+dx));
-        playerPos = newPos;
-    default:  return;
+        ClearPlayerPos();
+        SetPlayerPos(newPos, dy, dx);
+    default:
+        SetPlayerPos(playerPos, dy,dx);
     }
+}
+
+void Sokoban::SetPlayerPos(Pos p, int dy, int dx) {
+#if defined(DEBUG)
+    assert(InBound(p));
+#endif
+    playerPos = p;
+    Get(playerPos) |= TILE_PLAYER;
+    Get(playerPos) &= ~3;
+    Get(playerPos) |= (dy ? (1-dy) : (2+dx));
+}
+void Sokoban::ClearPlayerPos() {
+    Get(playerPos) &= (~(TILE_PLAYER|3));
 }
