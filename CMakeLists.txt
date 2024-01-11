@@ -15,6 +15,19 @@ if (NOT raylib_FOUND)
     FetchContent_MakeAvailable(raylib)
 endif()
 
+# raylib-gui
+find_package(raygui QUIET)
+if (NOT raygui_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        raygui
+        GIT_REPOSITORY https://github.com/raysan5/raygui.git
+        GIT_TAG 4.0
+    )
+    FetchContent_MakeAvailable(raygui)
+    include_directories(${raygui_SOURCE_DIR}/src)
+endif()
+
 # raylib-cpp
 find_package(raylib_cpp QUIET)
 if (NOT raylib_cpp_FOUND)
@@ -27,7 +40,7 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
-file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp")
+file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 # Define SOURCES as a list of all source files
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

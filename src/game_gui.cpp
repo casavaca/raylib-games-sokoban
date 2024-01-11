@@ -10,6 +10,16 @@ unordered_map<uint8_t, raylib::Texture> g_basePng;
 unordered_map<uint8_t, std::vector<raylib::Texture*>> g_pngs;
 
 namespace GameGui {
+
+static GameScene scene = START_SCENE;
+
+GameScene GetGameScene() {
+    return scene;
+}
+void SetGameScene(GameScene newScene){
+    scene = newScene;
+}
+
 void Init() {
     g_basePng[TILE_NULL            ] = raylib::Texture("../assets/kenney_sokoban-pack/PNG/Retina/Ground/ground_03.png");
     g_basePng[TILE_WALL            ] = raylib::Texture("../assets/kenney_sokoban-pack/PNG/Retina/Blocks/block_08.png");
