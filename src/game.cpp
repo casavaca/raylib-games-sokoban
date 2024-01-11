@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+#include <algorithm>
 #include <sstream>
 
 static const char* defaultLevelStr = 
@@ -61,4 +62,42 @@ bool Sokoban::LoadLevel(const std::vector<std::string>& lines) {
         }
     }
     return true;
+}
+
+Sokoban::Pos operator+(Sokoban::Pos a, Sokoban::Pos b) { return {a.row+b.row, a.col+b.col}; }
+TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
+TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
+TileType& operator&=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs & rhs); }
+TileType& operator&=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs & rhs); }
+
+// .--------> x
+// |
+// |
+// |
+// v
+// y
+void Sokoban::Push(int dy, int dx) {
+    Pos dp = {dy, dx};
+    Pos newPos = playerPos + dp;
+    if (!InBound(newPos))
+        return;
+    switch (state[newPos.row][newPos.col]) {
+    case TILE_BOX:
+    case TILE_BOX_ON_TARGET: {
+        Pos tmp = newPos + dp;
+        if (IsSpace(tmp)) {
+            Get(tmp)    |= TILE_BOX;
+            Get(newPos) &= ~TILE_BOX;
+        }
+    } // FALLTHROUGH
+    case TILE_SPACE:
+    case TILE_TARGET:
+        Get(playerPos) &= ~TILE_PLAYER;
+        Get(playerPos) &= ~3;
+        Get(newPos)    |= TILE_PLAYER;
+        Get(newPos)    &= ~3;
+        Get(newPos)    |= (dy ? (1-dy) : (2+dx));
+        playerPos = newPos;
+    default:  return;
+    }
 }
