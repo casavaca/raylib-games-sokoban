@@ -119,6 +119,7 @@ void Sokoban::Pull(Pos lastPlayerPos, Pos dp) {
     Get(lastPlayerPos) |=  TILE_BOX;
     ClearPlayerPos();
     SetPlayerPos(newPos, -dp.row, -dp.col);
+    accessCache.clear();
 }
 
 void Sokoban::Regret() {
