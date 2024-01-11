@@ -34,15 +34,15 @@ int main() {
 
         // Update
         //----------------------------------------------------------------------------------
+        if (auto key = GetKeyPressed())
+            LastKeyPressed = key;
+
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
             IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) ||
             IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
             auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
             game.Click(nrow, ncol);
-        } else if (auto key = GetKeyPressed()) {
-            LastKeyPressed = key;
-        }
-        if (IsKeyPressed(LastKeyPressed) || IsKeyPressedRepeat(LastKeyPressed)) {
+        } else if (IsKeyPressed(LastKeyPressed) || IsKeyPressedRepeat(LastKeyPressed)) {
             auto key = LastKeyPressed;
             if (GameConfig::IsUp     (key)) { game.PushNorth(); }
             if (GameConfig::IsDown   (key)) { game.PushSouth(); }
