@@ -1,7 +1,11 @@
 #include "game.hpp"
 
 #include <algorithm>
+#include <functional>
+#include <queue>
 #include <sstream>
+
+using namespace std;
 
 static const char* defaultLevelStr = 
         "_####__\n"
@@ -12,22 +16,22 @@ static const char* defaultLevelStr =
         "#   ###\n"
         "#####__\n";
 
-static std::vector<std::string> Split(const std::string& target) {
-    std::string temp;
-    std::stringstream stringstream { target };
-    std::vector<std::string> result;
-    while (std::getline(stringstream, temp)) {
+static vector<string> Split(const string& target) {
+    string temp;
+    stringstream stringstream { target };
+    vector<string> result;
+    while (getline(stringstream, temp)) {
         result.push_back(temp);
     }
     return result;
 }
 
-static Sokoban::State ConvertFromTxt(const std::vector<std::string>& lines) {
+static Sokoban::State ConvertFromTxt(const vector<string>& lines) {
     // simple validation.
-    static std::string allowed = "#$@*._ ";
+    static string allowed = "#$@*._ ";
 
     if(!lines.size()) return {};
-    auto nCol = std::max_element(lines.begin(), lines.end(),
+    auto nCol = max_element(lines.begin(), lines.end(),
                                  [](auto a,auto b){return a.size()<b.size();})->size();
     for (auto &s:lines) {
         if (s.find_first_of("#") == s.npos) return {};
@@ -38,7 +42,7 @@ static Sokoban::State ConvertFromTxt(const std::vector<std::string>& lines) {
     Sokoban::State ret;
     for (auto s:lines) {
         ret.emplace_back();
-        std::transform(s.begin(), s.end(), std::back_inserter(ret.back()),
+        transform(s.begin(), s.end(), back_inserter(ret.back()),
                        [](char c){return Sokoban::txtMap[c];});
     }
     return ret;
@@ -48,7 +52,7 @@ bool Sokoban::LoadDefaultLevel() {
     return Sokoban::LoadLevel(Split(defaultLevelStr));
 }
 
-bool Sokoban::LoadLevel(const std::vector<std::string>& lines) {
+bool Sokoban::LoadLevel(const vector<string>& lines) {
     state = ConvertFromTxt(lines);
     if (state.empty()) {
         return false;
@@ -64,6 +68,7 @@ bool Sokoban::LoadLevel(const std::vector<std::string>& lines) {
     return true;
 }
 
+// operators
 Sokoban::Pos operator+(Sokoban::Pos a, Sokoban::Pos b) { return {a.row+b.row, a.col+b.col}; }
 TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
@@ -89,6 +94,7 @@ void Sokoban::Push(int dy, int dx) {
             return SetPlayerPos(playerPos, dy,dx);
         Get(tmp)    |= TILE_BOX;
         Get(newPos) &= ~TILE_BOX;
+        accessCache.clear();
     } // FALLTHROUGH
     case TILE_SPACE:
     case TILE_TARGET:
@@ -111,3 +117,42 @@ void Sokoban::SetPlayerPos(Pos p, int dy, int dx) {
 void Sokoban::ClearPlayerPos() {
     Get(playerPos) &= (~(TILE_PLAYER|3));
 }
+
+void Sokoban::Click(int nrow, int ncol) {
+    if (abs(nrow - playerPos.row) + abs(ncol - playerPos.col) == 1) {
+        return Push(nrow - playerPos.row, ncol - playerPos.col);
+    }
+    Pos newPos{nrow, ncol};
+    if (!IsSpace(newPos))
+        return;
+    if (Accessible(playerPos, newPos)) {
+        ClearPlayerPos();
+        SetPlayerPos(newPos, 1, 0);
+    }
+}
+bool Sokoban::Accessible(Pos s, Pos t) {
+    if (accessCache.size()) {
+        return accessCache.count(t);
+    }
+    // BFS
+    vector<vector<bool>> visited(state.size(), vector<bool>(state[0].size()));
+    visited[s.row][s.col] = true;
+    accessCache.insert(s);
+    queue<Pos> q;
+    q.push(s);
+    while(q.size()) {
+        auto n = q.front();
+        q.pop();
+        std::array<Pos,4> dps = {Pos{-1,0},{1,0},{0,-1},{0,1}};
+        for (auto dp:dps) {
+            auto next = n+dp;
+            if (!InBound(next) || IsBox(next) || IsBlocked(next) || visited[next.row][next.col])
+                continue;
+            visited[next.row][next.col] = true;
+            accessCache.insert(next);
+            q.push(next);
+        }
+    }
+    return accessCache.count(t);
+}
+

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <unordered_set>
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -46,7 +47,17 @@ enum TileType : uint8_t {
 class Sokoban {
 public:
 
-    struct Pos {int row,col;};
+    struct Pos {
+        int row,col;
+        bool operator==(const Sokoban::Pos& b) const noexcept {
+            return row == b.row && col == b.col;
+        }
+    };
+    struct PosHash {
+        std::size_t operator()(const Pos& p) const noexcept {
+            return std::hash<ssize_t>()((1LL<<32) * p.row + p.col);
+        }
+    };
 
     using State = std::vector<std::vector<TileType>>;
 
@@ -71,15 +82,13 @@ public:
     void PushEast (){ Push( 0, 1); }
     void PushWest (){ Push( 0,-1); }
     void Push(int dy, int dx);
-    void Click(int nrow, int ncol) {
-        Teleport(nrow, ncol);
-    }
+    void Click(int nrow, int ncol);
 private:
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
     int  GetSubtype(Pos p) const {return state[p.row][p.col] & 3; }
     bool IsBlocked(Pos p) const {return InBound(p) && (Get(p) & TILE_BLOCKED);     }
-    bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_WALL);        }
+    bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_BOX);         }
     bool IsSpace  (Pos p) const {return InBound(p) && !(Get(p) & TILE_SPACE_MASK); }
     bool InBound(Pos p) const {return InBound(p.row, p.col); }
     bool InBound(int row, int col) const {
@@ -87,19 +96,12 @@ private:
         int N = state[0].size();
         return (row >= 0 && row < M && col >= 0 && col < N);
     }
+    bool Accessible(Pos s, Pos t);
     void ClearPlayerPos();
     void SetPlayerPos(Pos p, int dy, int dx);
 private:
     Pos   playerPos;
     State state;
     std::vector<std::string> level;
-    // helper functions.
-    void Teleport(Pos p) { return Teleport(p.row, p.col); }
-    void Teleport(int row, int col) {
-        if (InBound(row, col)) {
-            state[row][col] = TILE_PLAYER;
-            state[playerPos.row][playerPos.col] = TILE_SPACE;
-            playerPos = Pos{row, col};
-        }
-    }
+    std::unordered_set<Pos, PosHash> accessCache;
 };
