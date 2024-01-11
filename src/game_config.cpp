@@ -19,11 +19,11 @@ static bool Contain(Binding b, int key) {
     return std::find(b.begin(), b.end(), key) != b.end();
 }
 
-bool IsUp     (int key) { return Contain(bindings[Up],      key); }
-bool IsDown   (int key) { return Contain(bindings[Down],    key); }
-bool IsRight  (int key) { return Contain(bindings[Right],   key); }
-bool IsLeft   (int key) { return Contain(bindings[Left],    key); }
-bool IsRestart(int key) { return Contain(bindings[Restart], key); }
-bool IsRegret (int key) { return Contain(bindings[Regret],  key); }
+bool IsUp     (int key) { return key != KEY_NULL && Contain(bindings[Up],      key); }
+bool IsDown   (int key) { return key != KEY_NULL && Contain(bindings[Down],    key); }
+bool IsRight  (int key) { return key != KEY_NULL && Contain(bindings[Right],   key); }
+bool IsLeft   (int key) { return key != KEY_NULL && Contain(bindings[Left],    key); }
+bool IsRestart(int key) { return key != KEY_NULL && Contain(bindings[Restart], key); }
+bool IsRegret (int key) { return key != KEY_NULL && Contain(bindings[Regret],  key); }
 
 }

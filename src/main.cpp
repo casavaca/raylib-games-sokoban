@@ -14,7 +14,7 @@ int main() {
     //--------------------------------------------------------------------------------------
     raylib::Window window(800, 600, "sokoban");
 
-    GuiLoadStyle("assets/styles/bluish/style_bluish.rgs");
+    GuiLoadStyle("assets/styles/cyber/cyber.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
     Sokoban game;
     game.LoadDefaultLevel();
@@ -44,6 +44,7 @@ int main() {
                 SetGameScene(MAIN_GAME_SCENE);
             } else if (GameConfig::IsRestart(lastKeyPressed)) {
                 game.Restart();
+                SetGameScene(MAIN_GAME_SCENE);
             }
         } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
             IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) ||
@@ -68,7 +69,7 @@ int main() {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-        window.ClearBackground(RAYWHITE);
+        window.ClearBackground(LIGHTGRAY);
         switch(GetGameScene()) {
         case START_SCENE: {
             char textBoxText[64] = "Start";
