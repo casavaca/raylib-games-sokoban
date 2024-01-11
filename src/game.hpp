@@ -102,6 +102,7 @@ private:
     bool Accessible(Pos s, Pos t);
     void ClearPlayerPos();
     void SetPlayerPos(Pos p, int dy, int dx);
+    void Clear() {history={}; accessCache.clear();}
 private:
     Pos   playerPos;
     State state;

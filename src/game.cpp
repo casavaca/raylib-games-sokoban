@@ -53,6 +53,7 @@ bool Sokoban::LoadDefaultLevel() {
 }
 
 bool Sokoban::LoadLevel(const vector<string>& lines) {
+    Clear();
     state = ConvertFromTxt(lines);
     if (state.empty()) {
         return false;
