@@ -2,11 +2,10 @@
 
 # How to build and run:
 
-+ Debug build:
-  `mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=DEBUG && make && ./sokoban`
-
-+ Release build:
-  `mkdir build && cd build && cmake .. && make && ./sokoban`
++ Debug build:   `make debug`
++ Release build: `make release`
++ WASM build:    `make emscripten`
++ host the html: `python3 -m http.server -d emscripten-build`
 
 # Coding conventions:
 
@@ -16,5 +15,6 @@ same as [raylib-coding-conventions](https://github.com/raysan5/raylib/wiki/rayli
 
 + Load levels from txt file
 + select levels
++ config gui
 + testing (raylib `RecordAutomationEvent` and `PlayAutomationEvent`)
-+ add github CI
++ github CI
