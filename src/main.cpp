@@ -23,6 +23,8 @@ int main() {
     //---------------------------------------------------------------------------------------
 
     // Main game loop
+    int LastKeyPressed = KEY_NULL;
+
     while (!window.ShouldClose()) {    // Detect window close button or ESC key
 #if defined(DEBUG)
         if (GetCharPressed() == 'q') {
@@ -38,15 +40,18 @@ int main() {
             auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
             game.Click(nrow, ncol);
         } else if (auto key = GetKeyPressed()) {
+            LastKeyPressed = key;
+        }
+        if (IsKeyPressed(LastKeyPressed) || IsKeyPressedRepeat(LastKeyPressed)) {
+            auto key = LastKeyPressed;
             if (GameConfig::IsUp     (key)) { game.PushNorth(); }
             if (GameConfig::IsDown   (key)) { game.PushSouth(); }
             if (GameConfig::IsRight  (key)) { game.PushEast (); }
             if (GameConfig::IsLeft   (key)) { game.PushWest (); }
             if (GameConfig::IsRestart(key)) { game.Restart  (); }
             if (GameConfig::IsRegret (key)) { game.Regret   (); }
-        } else {
-            // TODO: no need to redraw?
         }
+        // TODO: do nothing when no need to redraw?
  
         //----------------------------------------------------------------------------------
         // Draw
