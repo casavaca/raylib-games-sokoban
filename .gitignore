@@ -3,6 +3,6 @@
 .vs/
 cmake-build-debug/
 bin/
-build/
+*build/
 out/
 CMakeSettings.json

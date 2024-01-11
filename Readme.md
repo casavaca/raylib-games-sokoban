@@ -1,3 +1,5 @@
+# Working in progress
+
 # How to build and run:
 
 + Debug build:
@@ -10,4 +12,9 @@
 
 same as [raylib-coding-conventions](https://github.com/raysan5/raylib/wiki/raylib-coding-conventions)
 
+# TODO
 
++ Load levels from txt file
++ select levels
++ testing (raylib `RecordAutomationEvent` and `PlayAutomationEvent`)
++ add github CI
