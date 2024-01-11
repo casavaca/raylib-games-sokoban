@@ -62,8 +62,19 @@ int main() {
             if (key == KEY_ESCAPE) {
                 SetGameScene(ESC_SCENE);
             }
+        } else {
+#if defined(PLATFORM_WEB)
+            bool doRedraw = true;
+#else
+            bool doRedraw = window.IsResized();
+#endif
+            // no need to redraw
+            if (!doRedraw){
+                BeginDrawing();
+                EndDrawing();
+                continue;
+            }
         }
-        // TODO: do nothing when no need to redraw?
  
         //----------------------------------------------------------------------------------
         // Draw
@@ -72,6 +83,7 @@ int main() {
         window.ClearBackground(LIGHTGRAY);
         switch(GetGameScene()) {
         case START_SCENE: {
+            // TODO: de-duplicate these codes.
             char textBoxText[64] = "Start";
             bool textBoxEditMode = false;
             if (GuiTextBox((Rectangle){ 45, 215, 325, 60 }, textBoxText, 64, textBoxEditMode)) {
