@@ -25,6 +25,8 @@ if (NOT raygui_FOUND)
         GIT_TAG 4.0
     )
     FetchContent_MakeAvailable(raygui)
+    # copy style files to binary dir / assets
+    file(COPY ${raygui_SOURCE_DIR}/styles DESTINATION ${CMAKE_BINARY_DIR}/assets)
     include_directories(${raygui_SOURCE_DIR}/src)
 endif()
 

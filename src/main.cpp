@@ -14,6 +14,8 @@ int main() {
     //--------------------------------------------------------------------------------------
     raylib::Window window(800, 600, "sokoban");
 
+    GuiLoadStyle("assets/styles/bluish/style_bluish.rgs");
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
     Sokoban game;
     game.LoadDefaultLevel();
 
@@ -61,9 +63,9 @@ int main() {
         BeginDrawing();
         switch(GetGameScene()) {
         case START_SCENE: {
-            char textBoxText[64] = "Hello";
+            char textBoxText[64] = "Start";
             bool textBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 25, 215, 125, 30 }, textBoxText, 64, textBoxEditMode)) {
+            if (GuiTextBox((Rectangle){ 45, 215, 125, 60 }, textBoxText, 64, textBoxEditMode)) {
                 SetGameScene(MAIN_GAME_SCENE);
                 auto [screenWidth, screenHeight] = GameGui::GetWindowSize(game.GetState());
                 window.SetSize(screenWidth, screenHeight);
