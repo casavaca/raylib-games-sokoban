@@ -3,10 +3,6 @@ project(sokoban)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-   set(PLATFORM "Web")
-endif()
-
 # raylib
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
