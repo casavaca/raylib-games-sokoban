@@ -110,8 +110,10 @@ void Sokoban::Push(int dy, int dx) {
 void Sokoban::Pull(Pos lastPlayerPos, Pos dp) {
     Pos newPos = lastPlayerPos + dp;
     Pos boxPos = lastPlayerPos - dp;
+#if defined(DEBUG)
     assert(InBound(newPos) && IsSpace(newPos));
     assert(InBound(boxPos) && IsBox(boxPos));
+#endif
     Get(boxPos) &= ~TILE_BOX;
     Get(lastPlayerPos) |=  TILE_BOX;
     ClearPlayerPos();

@@ -3,6 +3,10 @@ project(sokoban)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+   set(PLATFORM "Web")
+endif()
+
 # raylib
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
@@ -42,6 +46,7 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 # Define SOURCES as a list of all source files
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -59,7 +64,7 @@ if (${PLATFORM} STREQUAL "Web")
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
     # Required linker flags for using Raylib with Emscripten
+    target_link_options(${PROJECT_NAME} PRIVATE --preload-file assets)
+    target_link_options(${PROJECT_NAME} PRIVATE -sASSERTIONS=1 -sASYNCIFY -sGL_ENABLE_GET_PROC_ADDRESS=1)
     target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
 endif()
-
-# That's it! You should have an example executable that you can run. Have fun!
