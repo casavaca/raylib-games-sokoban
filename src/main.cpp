@@ -25,7 +25,7 @@ int main() {
     //---------------------------------------------------------------------------------------
 
     // Main game loop
-    int LastKeyPressed = KEY_NULL;
+    int lastKeyPressed = KEY_NULL;
 
     while (!window.ShouldClose()) {    // Detect window close button or ESC key
 #if defined(DEBUG)
@@ -37,23 +37,30 @@ int main() {
         // Update
         //----------------------------------------------------------------------------------
         if (auto key = GetKeyPressed())
-            LastKeyPressed = key;
+            lastKeyPressed = key;
 
         if (GetGameScene() != MAIN_GAME_SCENE) {
-            // TODO?
+            if (lastKeyPressed == KEY_SPACE || lastKeyPressed == KEY_ENTER) {
+                SetGameScene(MAIN_GAME_SCENE);
+            } else if (GameConfig::IsRestart(lastKeyPressed)) {
+                game.Restart();
+            }
         } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
             IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON) ||
             IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
             auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
             game.Click(nrow, ncol);
-        } else if (IsKeyPressed(LastKeyPressed) || IsKeyPressedRepeat(LastKeyPressed)) {
-            auto key = LastKeyPressed;
+        } else if (IsKeyPressed(lastKeyPressed) || IsKeyPressedRepeat(lastKeyPressed)) {
+            auto key = lastKeyPressed;
             if (GameConfig::IsUp     (key)) { game.PushNorth(); }
             if (GameConfig::IsDown   (key)) { game.PushSouth(); }
             if (GameConfig::IsRight  (key)) { game.PushEast (); }
             if (GameConfig::IsLeft   (key)) { game.PushWest (); }
             if (GameConfig::IsRestart(key)) { game.Restart  (); }
             if (GameConfig::IsRegret (key)) { game.Regret   (); }
+            if (key == KEY_ESCAPE) {
+                SetGameScene(ESC_SCENE);
+            }
         }
         // TODO: do nothing when no need to redraw?
  
@@ -61,18 +68,46 @@ int main() {
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
+        window.ClearBackground(RAYWHITE);
         switch(GetGameScene()) {
         case START_SCENE: {
             char textBoxText[64] = "Start";
             bool textBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 45, 215, 125, 60 }, textBoxText, 64, textBoxEditMode)) {
+            if (GuiTextBox((Rectangle){ 45, 215, 325, 60 }, textBoxText, 64, textBoxEditMode)) {
                 SetGameScene(MAIN_GAME_SCENE);
                 auto [screenWidth, screenHeight] = GameGui::GetWindowSize(game.GetState());
                 window.SetSize(screenWidth, screenHeight);
             }
+            char exitBoxText[64] = "Exit";
+            bool exitBoxEditMode = false;
+            if (GuiTextBox((Rectangle){ 45, 315, 325, 60 }, exitBoxText, 64, exitBoxEditMode)) {
+                return 0;
+            }
+        } break;
+        case ESC_SCENE: {
+            char resumeBoxText[64] = "Resume (SPACE)";
+            bool resumeBoxEditMode = false;
+            if (GuiTextBox((Rectangle){ 45, 215, 325, 60 }, resumeBoxText, 64, resumeBoxEditMode)) {
+                SetGameScene(MAIN_GAME_SCENE);
+            }
+            char textBoxText[64] = "Restart (R)";
+            bool textBoxEditMode = false;
+            if (GuiTextBox((Rectangle){ 45, 315, 325, 60 }, textBoxText, 64, textBoxEditMode)) {
+                SetGameScene(MAIN_GAME_SCENE);
+                game.Restart();
+            }
+            char exitBoxText[64] = "Exit";
+            bool exitBoxEditMode = false;
+            if (GuiTextBox((Rectangle){ 45, 415, 325, 60 }, exitBoxText, 64, exitBoxEditMode)) {
+                return 0;
+            }
         } break;
         case MAIN_GAME_SCENE: {
-            window.ClearBackground(RAYWHITE);
+            auto expectedsize = GameGui::GetWindowSize(game.GetState());
+            if (GetScreenWidth () != expectedsize.first ||
+                GetScreenHeight() != expectedsize.second) {
+                window.SetSize(expectedsize.first, expectedsize.second);
+            }
             GameGui::Draw(game.GetState());
         } break;
         default: break;
