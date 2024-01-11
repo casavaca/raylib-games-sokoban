@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <stack>
 #include <unordered_set>
 #include <vector>
 #include <string>
@@ -83,7 +84,9 @@ public:
     void PushWest (){ Push( 0,-1); }
     void Push(int dy, int dx);
     void Click(int nrow, int ncol);
+    void Regret();
 private:
+    void Pull(Pos LastPlayerPos, Pos dp);
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
     int  GetSubtype(Pos p) const {return state[p.row][p.col] & 3; }
@@ -103,5 +106,6 @@ private:
     Pos   playerPos;
     State state;
     std::vector<std::string> level;
+    std::stack<std::pair<Pos,Pos>> history;
     std::unordered_set<Pos, PosHash> accessCache;
 };

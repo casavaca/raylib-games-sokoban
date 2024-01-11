@@ -12,5 +12,6 @@ bool IsDown   (int key);
 bool IsRight  (int key);
 bool IsLeft   (int key);
 bool IsRestart(int key);
+bool IsRegret (int key);
 
 }

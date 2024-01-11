@@ -43,6 +43,7 @@ int main() {
             if (GameConfig::IsRight  (key)) { game.PushEast (); }
             if (GameConfig::IsLeft   (key)) { game.PushWest (); }
             if (GameConfig::IsRestart(key)) { game.Restart  (); }
+            if (GameConfig::IsRegret (key)) { game.Regret   (); }
         } else {
             // TODO: no need to redraw?
         }

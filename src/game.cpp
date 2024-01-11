@@ -70,6 +70,7 @@ bool Sokoban::LoadLevel(const vector<string>& lines) {
 
 // operators
 Sokoban::Pos operator+(Sokoban::Pos a, Sokoban::Pos b) { return {a.row+b.row, a.col+b.col}; }
+Sokoban::Pos operator-(Sokoban::Pos a, Sokoban::Pos b) { return {a.row-b.row, a.col-b.col}; }
 TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator&=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs & rhs); }
@@ -92,6 +93,7 @@ void Sokoban::Push(int dy, int dx) {
         Pos tmp = newPos + dp;
         if (!IsSpace(tmp))
             return SetPlayerPos(playerPos, dy,dx);
+        history.push({newPos, Pos{-dy,-dx}});
         Get(tmp)    |= TILE_BOX;
         Get(newPos) &= ~TILE_BOX;
         accessCache.clear();
@@ -103,6 +105,25 @@ void Sokoban::Push(int dy, int dx) {
     default:
         SetPlayerPos(playerPos, dy,dx);
     }
+}
+
+void Sokoban::Pull(Pos lastPlayerPos, Pos dp) {
+    Pos newPos = lastPlayerPos + dp;
+    Pos boxPos = lastPlayerPos - dp;
+    assert(InBound(newPos) && IsSpace(newPos));
+    assert(InBound(boxPos) && IsBox(boxPos));
+    Get(boxPos) &= ~TILE_BOX;
+    Get(lastPlayerPos) |=  TILE_BOX;
+    ClearPlayerPos();
+    SetPlayerPos(newPos, -dp.row, -dp.col);
+}
+
+void Sokoban::Regret() {
+    if (history.empty())
+        return;
+    auto [lastPlayerPos, dp] = history.top();
+    history.pop();
+    Pull(lastPlayerPos, dp);
 }
 
 void Sokoban::SetPlayerPos(Pos p, int dy, int dx) {
