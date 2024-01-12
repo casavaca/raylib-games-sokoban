@@ -83,11 +83,7 @@ private:
     bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_BOX);         }
     bool IsSpace  (Pos p) const {return InBound(p) && !(Get(p) & TILE_SPACE_MASK); }
     bool InBound(Pos p) const {return InBound(p.row, p.col); }
-    bool InBound(int row, int col) const {
-        int M = state.size();
-        int N = state[0].size();
-        return (row >= 0 && row < M && col >= 0 && col < N);
-    }
+    bool InBound(int row, int col) const { return (row >= 0 && row < state.size() && col >= 0 && col < state[0].size()); }
     bool Accessible(Pos s, Pos t);
     void ClearPlayerPos();
     void SetPlayerPos(Pos p, int dy, int dx);

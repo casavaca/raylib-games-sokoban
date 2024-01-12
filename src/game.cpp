@@ -5,6 +5,8 @@
 #include <queue>
 #include <sstream>
 
+#include <cassert>
+
 using namespace std;
 
 static const char* defaultLevelStr = 

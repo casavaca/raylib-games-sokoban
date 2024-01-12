@@ -79,6 +79,8 @@ int main() {
         //----------------------------------------------------------------------------------
         // Draw
         //----------------------------------------------------------------------------------
+        Rectangle Rects[] = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
+
         BeginDrawing();
         window.ClearBackground(LIGHTGRAY);
         switch(GetGameScene()) {
@@ -86,32 +88,32 @@ int main() {
             // TODO: de-duplicate these codes.
             char textBoxText[64] = "Start";
             bool textBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 45, 115, 325, 60 }, textBoxText, 64, textBoxEditMode)) {
+            if (GuiTextBox(Rects[0], textBoxText, 64, textBoxEditMode)) {
                 SetGameScene(MAIN_GAME_SCENE);
                 auto [screenWidth, screenHeight] = GameGui::GetWindowSize(game.GetState());
                 window.SetSize(screenWidth, screenHeight);
             }
             char exitBoxText[64] = "Exit";
             bool exitBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 45, 215, 325, 60 }, exitBoxText, 64, exitBoxEditMode)) {
+            if (GuiTextBox(Rects[1], exitBoxText, 64, exitBoxEditMode)) {
                 return 0;
             }
         } break;
         case ESC_SCENE: {
             char resumeBoxText[64] = "Resume (SPACE)";
             bool resumeBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 45, 115, 325, 60 }, resumeBoxText, 64, resumeBoxEditMode)) {
+            if (GuiTextBox(Rects[0], resumeBoxText, 64, resumeBoxEditMode)) {
                 SetGameScene(MAIN_GAME_SCENE);
             }
             char textBoxText[64] = "Restart (R)";
             bool textBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 45, 215, 325, 60 }, textBoxText, 64, textBoxEditMode)) {
+            if (GuiTextBox(Rects[1], textBoxText, 64, textBoxEditMode)) {
                 SetGameScene(MAIN_GAME_SCENE);
                 game.Restart();
             }
             char exitBoxText[64] = "Exit";
             bool exitBoxEditMode = false;
-            if (GuiTextBox((Rectangle){ 45, 315, 325, 60 }, exitBoxText, 64, exitBoxEditMode)) {
+            if (GuiTextBox(Rects[2], exitBoxText, 64, exitBoxEditMode)) {
                 return 0;
             }
         } break;
