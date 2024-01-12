@@ -44,9 +44,11 @@ int main() {
             // single touch not recognized as Pressed
             // Draw circle and touch index number
             leftButton = true;
-            // std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
-            nrow = GameGui::PixelToIndex(GetTouchPosition(0)).first;
-            ncol = GameGui::PixelToIndex(GetTouchPosition(0)).second;
+            std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
+            // nrow = GameGui::PixelToIndex(GetTouchPosition(0)).first;
+            // ncol = GameGui::PixelToIndex(GetTouchPosition(0)).second;
+        } else {
+            leftButton = false;
         }
         bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
 
