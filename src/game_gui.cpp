@@ -74,7 +74,8 @@ static int GetBlockPixels() {
 }
 
 std::pair<int,int> GetWindowSize(const Sokoban::State& state) {
-    return {state.size() * GetBlockPixels(), state[0].size() * GetBlockPixels()};
+    return {static_cast<int>(state.size()) * GetBlockPixels(),
+            static_cast<int>(state[0].size()) * GetBlockPixels()};
 }
 
 std::pair<int,int> PixelToIndex(Vector2 pos) {
