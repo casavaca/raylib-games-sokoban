@@ -6,13 +6,14 @@ namespace GameConfig {
 
 enum { Up, Down, Right, Left, Restart, Regret, NUM_BINDINGS };
 
+// gcc doesn't support non-trivial designated initializers not supported
 static Binding bindings[NUM_BINDINGS] {
-    [Up     ] = {KEY_UP   , KEY_I, KEY_W, KEY_NULL},
-    [Down   ] = {KEY_DOWN , KEY_K, KEY_S, KEY_NULL},
-    [Right  ] = {KEY_RIGHT, KEY_L, KEY_D, KEY_NULL},
-    [Left   ] = {KEY_LEFT , KEY_J, KEY_A, KEY_NULL},
-    [Regret ] = {KEY_Z},
-    [Restart] = {KEY_R},
+    /*[Up     ] = */ {KEY_UP   , KEY_I, KEY_W, KEY_NULL},
+    /*[Down   ] = */ {KEY_DOWN , KEY_K, KEY_S, KEY_NULL},
+    /*[Right  ] = */ {KEY_RIGHT, KEY_L, KEY_D, KEY_NULL},
+    /*[Left   ] = */ {KEY_LEFT , KEY_J, KEY_A, KEY_NULL},
+    /*[Restart] = */ {KEY_R},
+    /*[Regret ] = */ {KEY_Z},
 };
 
 static bool Contain(Binding b, int key) {

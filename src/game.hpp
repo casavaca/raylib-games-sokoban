@@ -55,8 +55,8 @@ public:
         }
     };
     struct PosHash {
-        std::size_t operator()(const Pos& p) const noexcept {
-            return std::hash<ssize_t>()((1LL<<32) * p.row + p.col);
+        int64_t operator()(const Pos& p) const noexcept {
+            return std::hash<int64_t>()((1LL<<32) * p.row + p.col);
         }
     };
 
