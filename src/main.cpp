@@ -38,18 +38,17 @@ int main() {
         // Update
         //----------------------------------------------------------------------------------
         auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
-        bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-        bool rightButton = IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
-
-        // Get the touch point count ( how many fingers are touching the screen )
-        if (auto touchCount = GetTouchPointCount()) {
-            if (touchCount == 1) {
-                std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
-                leftButton = true;
-            } else {
-                rightButton = true;
-            }
+        bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
+                           IsMouseButtonDown(MOUSE_LEFT_BUTTON);
+        if (GetTouchPointCount() == 1) {
+            // single touch not recognized as Pressed
+            // Draw circle and touch index number
+            leftButton = true;
+            // std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
+            nrow = GameGui::PixelToIndex(GetTouchPosition(0)).first;
+            ncol = GameGui::PixelToIndex(GetTouchPosition(0)).second;
         }
+        bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
 
         if (auto key = GetKeyPressed())
             lastKeyPressed = key;
