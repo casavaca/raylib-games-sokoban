@@ -21,16 +21,22 @@ void SetGameScene(GameScene newScene){
 }
 
 void Init() {
-    g_basePng[TILE_NULL            ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Ground/ground_03.png");
-    g_basePng[TILE_WALL            ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Blocks/block_08.png");
-    g_basePng[TILE_SPACE           ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Ground/ground_04.png");
-    g_basePng[TILE_TARGET          ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Environment/environment_12.png");
-    g_basePng[TILE_BOX             ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Crates/crate_42.png");
-    g_basePng[TILE_BOX_ON_TARGET   ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Crates/crate_45.png");
-    g_basePng[TILE_PLAYER_N        ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Player/player_06.png");
-    g_basePng[TILE_PLAYER_E        ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Player/player_20.png");
-    g_basePng[TILE_PLAYER_S        ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Player/player_03.png");
-    g_basePng[TILE_PLAYER_W        ] = raylib::Texture("assets/kenney_sokoban-pack/PNG/Retina/Player/player_17.png");
+#if defined(PLATFORM_WEB)
+    std::string prefix = "assets/kenney_sokoban-pack/PNG/Default size";
+#else
+    std::string prefix = "assets/kenney_sokoban-pack/PNG/Retina";
+#endif
+
+    g_basePng[TILE_NULL            ] = raylib::Texture(prefix + "/Ground/ground_03.png");
+    g_basePng[TILE_WALL            ] = raylib::Texture(prefix + "/Blocks/block_08.png");
+    g_basePng[TILE_SPACE           ] = raylib::Texture(prefix + "/Ground/ground_04.png");
+    g_basePng[TILE_TARGET          ] = raylib::Texture(prefix + "/Environment/environment_12.png");
+    g_basePng[TILE_BOX             ] = raylib::Texture(prefix + "/Crates/crate_42.png");
+    g_basePng[TILE_BOX_ON_TARGET   ] = raylib::Texture(prefix + "/Crates/crate_45.png");
+    g_basePng[TILE_PLAYER_N        ] = raylib::Texture(prefix + "/Player/player_06.png");
+    g_basePng[TILE_PLAYER_E        ] = raylib::Texture(prefix + "/Player/player_20.png");
+    g_basePng[TILE_PLAYER_S        ] = raylib::Texture(prefix + "/Player/player_03.png");
+    g_basePng[TILE_PLAYER_W        ] = raylib::Texture(prefix + "/Player/player_17.png");
 
     g_pngs[TILE_NULL               ] = {&g_basePng[TILE_NULL]};
     g_pngs[TILE_WALL               ] = {&g_basePng[TILE_NULL], &g_basePng[TILE_WALL]};

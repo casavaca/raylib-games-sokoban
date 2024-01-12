@@ -47,7 +47,7 @@ int main() {
             std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
             // nrow = GameGui::PixelToIndex(GetTouchPosition(0)).first;
             // ncol = GameGui::PixelToIndex(GetTouchPosition(0)).second;
-        } else {
+        } else if (GetTouchPointCount()) {
             leftButton = false;
         }
         bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
@@ -76,18 +76,6 @@ int main() {
             if (GameConfig::IsRegret (key)) { game.Regret   (); }
             if (key == KEY_ESCAPE) {
                 SetGameScene(ESC_SCENE);
-            }
-        } else {
-#if defined(PLATFORM_WEB)
-            bool doRedraw = true;
-#else
-            bool doRedraw = window.IsResized();
-#endif
-            // no need to redraw
-            if (!doRedraw){
-                BeginDrawing();
-                EndDrawing();
-                continue;
             }
         }
  

@@ -144,7 +144,11 @@ void Sokoban::ClearPlayerPos() {
 }
 
 void Sokoban::Click(int nrow, int ncol) {
-    if (abs(nrow - playerPos.row) + abs(ncol - playerPos.col) == 1) {
+    auto dis = abs(nrow - playerPos.row) + abs(ncol - playerPos.col);
+    if (dis == 0) {
+        return;
+    }
+    if (dis == 1) {
         return Push(nrow - playerPos.row, ncol - playerPos.col);
     }
     Pos newPos{nrow, ncol};
