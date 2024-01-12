@@ -3,7 +3,13 @@ project(sokoban)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+################################################################################
+# Dependencies
+################################################################################
+
+################################################################################
 # raylib
+################################################################################
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
     include(FetchContent)
@@ -20,7 +26,9 @@ if (NOT raylib_FOUND)
     FetchContent_MakeAvailable(raylib)
 endif()
 
+################################################################################
 # raylib-gui
+################################################################################
 find_package(raygui QUIET)
 if (NOT raygui_FOUND)
     include(FetchContent)
@@ -36,7 +44,9 @@ if (NOT raygui_FOUND)
     include_directories(${raygui_SOURCE_DIR}/src)
 endif()
 
+################################################################################
 # raylib-cpp
+################################################################################
 find_package(raylib_cpp QUIET)
 if (NOT raylib_cpp_FOUND)
     include(FetchContent)
@@ -48,6 +58,17 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
+################################################################################
+# End Dependencies
+################################################################################
+
+# Set RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_BINARY_DIR}
+# RUNTIME_OUTPUT_DIRECTORY is where the binary is located.
+# If not set, on Windows, it will be ${CMAKE_BINARY_DIR}/${CONFIG}
+# but on linux it will be ${CMAKE_BINARY_DIR}.
+# Let's unify it to ${CMAKE_BINARY_DIR}
+
+set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 # Define SOURCES as a list of all source files
