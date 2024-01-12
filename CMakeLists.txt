@@ -9,8 +9,13 @@ if (NOT raylib_FOUND)
     include(FetchContent)
     FetchContent_Declare(
         raylib
-        GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 5.0
+        URL      https://github.com/raysan5/raylib/archive/refs/tags/5.0.tar.gz
+        URL_HASH SHA256=98f049b9ea2a9c40a14e4e543eeea1a7ec3090ebdcd329c4ca2cf98bc9793482
+        # Note that due to a long-unresolved bug in cmake
+        # (still open and no one is working on it)
+        # https://gitlab.kitware.com/cmake/cmake/-/issues/17770
+        # GIT_SHALLOW is not shallow enough.
+        # So, prefer URL if possible.
     )
     FetchContent_MakeAvailable(raylib)
 endif()
@@ -21,8 +26,8 @@ if (NOT raygui_FOUND)
     include(FetchContent)
     FetchContent_Declare(
         raygui
-        GIT_REPOSITORY https://github.com/raysan5/raygui.git
-        GIT_TAG 4.0
+        URL https://github.com/raysan5/raygui/archive/refs/tags/4.0.tar.gz
+        URL_HASH SHA256=299c8fcabda68309a60dc858741b76c32d7d0fc533cdc2539a55988cee236812
     )
     FetchContent_MakeAvailable(raygui)
     # copy style files to binary dir / assets
@@ -37,8 +42,8 @@ if (NOT raylib_cpp_FOUND)
     include(FetchContent)
     FetchContent_Declare(
         raylib_cpp
-        GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
-        GIT_TAG v5.0.0
+        URL      https://github.com/RobLoach/raylib-cpp/archive/refs/tags/v5.0.0.tar.gz
+        URL_HASH SHA256=c152ee48b48a9114e0250ecd4e4d853ad18592d4a9563b23366ee43e89237391
     )
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
