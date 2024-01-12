@@ -10,8 +10,7 @@
 
 + Linux: ./build/sokoban
 + Windows build: just run sokoban.exe.
-+ Windows download: get the binary from github CI [artifact](https://github.com/casavaca/raylib-games-sokoban/actions), then
-                    download "assets" and put it to the same directory as sokoban.exe
++ Windows download: get the binary and assets from github CI [artifact](https://github.com/casavaca/raylib-games-sokoban/actions), then put the exe and "assets" into the same directory. Note: GitHub signed-in needed to download workflow artifacts. [link](https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts)
 + WASM example: `python3 -m http.server -d emscripten-build`
 
 # Coding conventions:
