@@ -55,23 +55,12 @@ public:
         }
     };
     struct PosHash {
-        std::size_t operator()(const Pos& p) const noexcept {
-            return std::hash<ssize_t>()((1LL<<32) * p.row + p.col);
+        int64_t operator()(const Pos& p) const noexcept {
+            return std::hash<int64_t>()((1LL<<32) * p.row + p.col);
         }
     };
 
     using State = std::vector<std::vector<TileType>>;
-
-    // static data.
-    static constexpr TileType txtMap[] = {
-        [' '] = TILE_SPACE,
-        ['#'] = TILE_WALL,
-        ['$'] = TILE_BOX,
-        ['@'] = TILE_PLAYER,
-        ['*'] = TILE_BOX_ON_TARGET,
-        ['.'] = TILE_TARGET,
-        ['_'] = TILE_NULL,
-    };
 
 public:
     bool LoadLevel(const std::vector<std::string>& lines);
@@ -94,11 +83,7 @@ private:
     bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_BOX);         }
     bool IsSpace  (Pos p) const {return InBound(p) && !(Get(p) & TILE_SPACE_MASK); }
     bool InBound(Pos p) const {return InBound(p.row, p.col); }
-    bool InBound(int row, int col) const {
-        int M = state.size();
-        int N = state[0].size();
-        return (row >= 0 && row < M && col >= 0 && col < N);
-    }
+    bool InBound(int row, int col) const { return (row >= 0 && row < state.size() && col >= 0 && col < state[0].size()); }
     bool Accessible(Pos s, Pos t);
     void ClearPlayerPos();
     void SetPlayerPos(Pos p, int dy, int dx);

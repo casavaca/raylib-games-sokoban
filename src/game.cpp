@@ -5,6 +5,8 @@
 #include <queue>
 #include <sstream>
 
+#include <cassert>
+
 using namespace std;
 
 static const char* defaultLevelStr = 
@@ -26,6 +28,22 @@ static vector<string> Split(const string& target) {
     return result;
 }
 
+// static data.
+static constexpr TileType TxtMap(char c) {
+    switch (c) {
+    case ' ': return TILE_SPACE;
+    case '#': return TILE_WALL;
+    case '$': return TILE_BOX;
+    case '@': return TILE_PLAYER;
+    case '*': return TILE_BOX_ON_TARGET;
+    case '.': return TILE_TARGET;
+    case '_': return TILE_NULL;
+    default:
+        assert(false);
+        return TILE_NULL;
+    }
+}
+
 static Sokoban::State ConvertFromTxt(const vector<string>& lines) {
     // simple validation.
     static string allowed = "#$@*._ ";
@@ -42,8 +60,7 @@ static Sokoban::State ConvertFromTxt(const vector<string>& lines) {
     Sokoban::State ret;
     for (auto s:lines) {
         ret.emplace_back();
-        transform(s.begin(), s.end(), back_inserter(ret.back()),
-                       [](char c){return Sokoban::txtMap[c];});
+        transform(s.begin(), s.end(), back_inserter(ret.back()), TxtMap);
     }
     return ret;
 }
