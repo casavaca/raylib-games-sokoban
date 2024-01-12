@@ -3,6 +3,13 @@ project(sokoban)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+# This is a rare case and doesn't actually matter here.
+# https://github.com/ethereum/solidity/pull/13429
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 ################################################################################
 # Dependencies
 ################################################################################
@@ -40,7 +47,7 @@ if (NOT raygui_FOUND)
     FetchContent_MakeAvailable(raygui)
     # copy style files to binary dir / assets
     # TODO: don't copy for Web build
-    file(COPY ${raygui_SOURCE_DIR}/styles DESTINATION ${CMAKE_BINARY_DIR}/assets)
+    file(COPY ${raygui_SOURCE_DIR}/styles DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets)
     include_directories(${raygui_SOURCE_DIR}/src)
 endif()
 
@@ -62,14 +69,7 @@ endif()
 # End Dependencies
 ################################################################################
 
-# Set RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_BINARY_DIR}
-# RUNTIME_OUTPUT_DIRECTORY is where the binary is located.
-# If not set, on Windows, it will be ${CMAKE_BINARY_DIR}/${CONFIG}
-# but on linux it will be ${CMAKE_BINARY_DIR}.
-# Let's unify it to ${CMAKE_BINARY_DIR}
-
-set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 # Define SOURCES as a list of all source files
 add_executable(${PROJECT_NAME} ${SOURCES})
