@@ -45,9 +45,6 @@ if (NOT raygui_FOUND)
         URL_HASH SHA256=299c8fcabda68309a60dc858741b76c32d7d0fc533cdc2539a55988cee236812
     )
     FetchContent_MakeAvailable(raygui)
-    # copy style files to binary dir / assets
-    # TODO: don't copy for Web build
-    file(COPY ${raygui_SOURCE_DIR}/styles DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets)
     include_directories(${raygui_SOURCE_DIR}/src)
 endif()
 
@@ -69,16 +66,15 @@ endif()
 # End Dependencies
 ################################################################################
 
-file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+# find all source files.
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
-# Define SOURCES as a list of all source files
-add_executable(${PROJECT_NAME} ${SOURCES})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib raylib_cpp)
 
-if(CMAKE_BUILD_TYPE MATCHES [Dd][Ee][Bb][Uu][Gg])
-    target_compile_options(${PROJECT_NAME} PRIVATE "-DDEBUG")
-endif()
+# add the main target.
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+set_target_properties (${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+target_compile_options(${PROJECT_NAME} PRIVATE    $<$<CONFIG:Debug>:-DDEBUG>)
+target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
@@ -91,3 +87,30 @@ if (${PLATFORM} STREQUAL "Web")
     target_link_options(${PROJECT_NAME} PRIVATE --shell-file ${PROJECT_SOURCE_DIR}/src/template.html)
     target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
 endif()
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMENT "Copying assets to the destination directory"
+    # We want to copy assets/ to the same directory as the binary output. This is not trivial.
+    #
+    # https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#build-configurations
+    # The cmake build system is not very intuitive.
+    # cmake generates files for backend to consume, e.g., GNU Makefile, Ninja, Visual Studio, Xcode.
+    # Of these, some are single-config, other are multi-config.
+    # e.g., GNU Makefile is single-config. So, cmake generate different Makefiles for different config.
+    # but Visual Studio is multi-config, So, cmake just generate single project.sln for all configs.
+    # $CMAKE_CONFIGURATION_TYPES is defined for multi-config  generators, which contains a list of possible configs.
+    # $CMAKE_BUILD_TYPE          is defined for single-config generators.
+    #
+    # IMPORTANT NOTES:
+    #
+    # For multi-configuration generators like Visual Studio, Xcode, and Ninja Multi-Config,
+    # the configuration is chosen by the user at build time and CMAKE_BUILD_TYPE is ignored.
+    # ... the actual configuration used cannot be known until the build stage.
+    #
+    # So, we can't just use file(COPY ... DESTINATION ...) because it is too early to decide
+    # where the actual destination is. Thus, we use POST_BUILD command
+    # the $<$<BOOL:${CMAKE_CONFIGURATION_TYPES}>:$<CONFIG>> trick will evaluate to $<CONFIG> for
+    # multi-config backend, and "" to single-config backend.
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/assets" ${CMAKE_BINARY_DIR}/$<$<BOOL:${CMAKE_CONFIGURATION_TYPES}>:$<CONFIG>>/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${raygui_SOURCE_DIR}/styles"      ${CMAKE_BINARY_DIR}/$<$<BOOL:${CMAKE_CONFIGURATION_TYPES}>:$<CONFIG>>/assets/styles
+)
