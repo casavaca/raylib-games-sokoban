@@ -62,17 +62,6 @@ public:
 
     using State = std::vector<std::vector<TileType>>;
 
-    // static data.
-    static constexpr TileType txtMap[] = {
-        [' '] = TILE_SPACE,
-        ['#'] = TILE_WALL,
-        ['$'] = TILE_BOX,
-        ['@'] = TILE_PLAYER,
-        ['*'] = TILE_BOX_ON_TARGET,
-        ['.'] = TILE_TARGET,
-        ['_'] = TILE_NULL,
-    };
-
 public:
     bool LoadLevel(const std::vector<std::string>& lines);
     bool LoadDefaultLevel();
