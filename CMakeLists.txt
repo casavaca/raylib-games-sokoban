@@ -88,29 +88,40 @@ if (${PLATFORM} STREQUAL "Web")
     target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
 endif()
 
+# copy assets and "${raygui_SOURCE_DIR}/styles" into BIN_DIR/assets.
+#
+# To correctly get ${BIN_DIR} is not trivial.
+#
+# https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#build-configurations
+# The cmake build system is not very intuitive.
+# cmake generates files for backend to consume, e.g., GNU Makefile, Ninja, Visual Studio, Xcode.
+# Of these, some are single-config, other are multi-config.
+# e.g., GNU Makefile is single-config. So, cmake generate different Makefiles for different config.
+# but Visual Studio is multi-config, So, cmake just generate single project.sln for all configs.
+# $CMAKE_CONFIGURATION_TYPES is defined for multi-config  generators, which contains a list of possible configs.
+# $CMAKE_BUILD_TYPE          is defined for single-config generators.
+#
+# IMPORTANT NOTES:
+#
+# For multi-configuration generators like Visual Studio, Xcode, and Ninja Multi-Config,
+# the configuration is chosen by the user at build time and CMAKE_BUILD_TYPE is ignored.
+# ... the actual configuration used cannot be known until the build stage.
+#
+# So, BIN_DIR can't be determined at cmake generation time.
+#
+# (except you overwrite it and build all config to single location, see [this](https://discourse.cmake.org/t/changing-output-directories/8829), but not good.)
+#
+# So, we can't just use file(COPY ... DESTINATION ...) because it is too early to decide
+# where the actual destination is. Thus, we use POST_BUILD command
+if(CMAKE_CONFIGURATION_TYPES)
+    # Multi-config generator (e.g., Visual Studio)
+    set(BIN_DIR ${CMAKE_BINARY_DIR}/$<CONFIG>)
+else()
+    # Single-config generator (e.g., Makefile, Ninja)
+    set(BIN_DIR ${CMAKE_BINARY_DIR}/)
+endif()
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Copying assets to the destination directory"
-    # We want to copy assets/ to the same directory as the binary output. This is not trivial.
-    #
-    # https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#build-configurations
-    # The cmake build system is not very intuitive.
-    # cmake generates files for backend to consume, e.g., GNU Makefile, Ninja, Visual Studio, Xcode.
-    # Of these, some are single-config, other are multi-config.
-    # e.g., GNU Makefile is single-config. So, cmake generate different Makefiles for different config.
-    # but Visual Studio is multi-config, So, cmake just generate single project.sln for all configs.
-    # $CMAKE_CONFIGURATION_TYPES is defined for multi-config  generators, which contains a list of possible configs.
-    # $CMAKE_BUILD_TYPE          is defined for single-config generators.
-    #
-    # IMPORTANT NOTES:
-    #
-    # For multi-configuration generators like Visual Studio, Xcode, and Ninja Multi-Config,
-    # the configuration is chosen by the user at build time and CMAKE_BUILD_TYPE is ignored.
-    # ... the actual configuration used cannot be known until the build stage.
-    #
-    # So, we can't just use file(COPY ... DESTINATION ...) because it is too early to decide
-    # where the actual destination is. Thus, we use POST_BUILD command
-    # the $<$<BOOL:${CMAKE_CONFIGURATION_TYPES}>:$<CONFIG>> trick will evaluate to $<CONFIG> for
-    # multi-config backend, and "" to single-config backend.
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/assets" ${CMAKE_BINARY_DIR}/$<$<BOOL:${CMAKE_CONFIGURATION_TYPES}>:$<CONFIG>>/assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${raygui_SOURCE_DIR}/styles"      ${CMAKE_BINARY_DIR}/$<$<BOOL:${CMAKE_CONFIGURATION_TYPES}>:$<CONFIG>>/assets/styles
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/assets" ${BIN_DIR}/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${raygui_SOURCE_DIR}/styles"      ${BIN_DIR}/assets/styles
 )
