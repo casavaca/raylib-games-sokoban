@@ -64,13 +64,18 @@ jobs:
         sudo apt-get update -qq
         sudo apt-get install -y --no-install-recommends libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
 
-    - name: Restore Cache
-      uses: actions/cache/restore@v3
-      with:
-        # A list of files, directories, and wildcard patterns to cache and restore
-        path: ${{ steps.strings.outputs.build-output-dir }}
-        # An explicit key for restoring and saving the cache
-        key: "cache_of_${{ matrix.c_compiler }}"
+# It's nice to have cache, but it seems that it doesn't support updating yet.
+# we could do "save cache" "build" "delete cache and re-upload cache"
+# but let's postpone it to the future.
+# https://github.com/actions/toolkit/issues/505
+
+    # - name: Restore Cache
+    #   uses: actions/cache/restore@v3
+    #   with:
+    #     # A list of files, directories, and wildcard patterns to cache and restore
+    #     path: ${{ steps.strings.outputs.build-output-dir }}
+    #     # An explicit key for restoring and saving the cache
+    #     key: "cache_of_${{ matrix.os }}_${{ matrix.c_compiler }}_${{ matrix.build_type }}"
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -86,13 +91,13 @@ jobs:
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Save Cache
-      uses: actions/cache/save@v3
-      with:
-        # A list of files, directories, and wildcard patterns to cache and restore
-        path: ${{ steps.strings.outputs.build-output-dir }}
-        # An explicit key for restoring and saving the cache
-        key: "cache_of_${{ matrix.c_compiler }}"
+    # - name: Save Cache
+    #   uses: actions/cache/save@v3
+    #   with:
+    #     # A list of files, directories, and wildcard patterns to cache and restore
+    #     path: ${{ steps.strings.outputs.build-output-dir }}
+    #     # An explicit key for restoring and saving the cache
+    #     key: "cache_of_${{ matrix.os }}_${{ matrix.c_compiler }}_${{ matrix.build_type }}"
 
     - uses: actions/upload-artifact@v4
       if: ${{ matrix.os == 'windows-latest' }}

@@ -6,6 +6,8 @@
 + Release build: `make release`
 + WASM build:    `make emscripten`
 + host the html: `python3 -m http.server -d emscripten-build`
++ Windows: download the [artifact](https://github.com/casavaca/raylib-games-sokoban/actions) from most recent build and extract sokoban.exe
+           download "assets" directory from source code to the same folder, then run sokoban.exe
 
 # Coding conventions:
 
