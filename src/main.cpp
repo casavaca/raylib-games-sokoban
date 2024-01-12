@@ -1,6 +1,7 @@
 #include "raylib-cpp.hpp"
 #include "raylib.h"
 #include "raygui.h"
+#include "rgestures.h"
 
 #include "game.hpp"
 #include "game_gui.hpp"
@@ -36,6 +37,20 @@ int main() {
 
         // Update
         //----------------------------------------------------------------------------------
+        auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
+        bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+        bool rightButton = IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
+
+        // Get the touch point count ( how many fingers are touching the screen )
+        if (auto touchCount = GetTouchPointCount()) {
+            if (touchCount == 1) {
+                std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
+                leftButton = true;
+            } else {
+                rightButton = true;
+            }
+        }
+
         if (auto key = GetKeyPressed())
             lastKeyPressed = key;
 
@@ -46,10 +61,9 @@ int main() {
                 game.Restart();
                 SetGameScene(MAIN_GAME_SCENE);
             }
-        } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
+        } else if (leftButton) {
             game.Click(nrow, ncol);
-        } else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+        } else if (rightButton) {
             game.Regret();
         } else if (IsKeyPressed(lastKeyPressed) || IsKeyPressedRepeat(lastKeyPressed)) {
             auto key = lastKeyPressed;

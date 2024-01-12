@@ -26,9 +26,8 @@ if (NOT raygui_FOUND)
     )
     FetchContent_MakeAvailable(raygui)
     # copy style files to binary dir / assets
-    if (NOT ${PLATFORM} STREQUAL "Web")
-        file(COPY ${raygui_SOURCE_DIR}/styles DESTINATION ${CMAKE_BINARY_DIR}/assets)
-    endif()
+    # TODO: don't copy for Web build
+    file(COPY ${raygui_SOURCE_DIR}/styles DESTINATION ${CMAKE_BINARY_DIR}/assets)
     include_directories(${raygui_SOURCE_DIR}/src)
 endif()
 
@@ -44,9 +43,7 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
-if (NOT ${PLATFORM} STREQUAL "Web")
-    file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
-endif()
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/assets" DESTINATION "${CMAKE_BINARY_DIR}")
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 # Define SOURCES as a list of all source files
 add_executable(${PROJECT_NAME} ${SOURCES})
