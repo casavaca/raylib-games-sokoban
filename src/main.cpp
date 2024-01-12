@@ -42,11 +42,8 @@ int main() {
                            IsMouseButtonDown(MOUSE_LEFT_BUTTON);
         if (GetTouchPointCount() == 1) {
             // single touch not recognized as Pressed
-            // Draw circle and touch index number
             leftButton = true;
             std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
-            // nrow = GameGui::PixelToIndex(GetTouchPosition(0)).first;
-            // ncol = GameGui::PixelToIndex(GetTouchPosition(0)).second;
         } else if (GetTouchPointCount()) {
             leftButton = false;
         }
