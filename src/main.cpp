@@ -40,13 +40,6 @@ int main() {
         auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
         bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
                            IsMouseButtonDown(MOUSE_LEFT_BUTTON);
-        if (GetTouchPointCount() == 1) {
-            // single touch not recognized as Pressed
-            leftButton = true;
-            std::tie(nrow, ncol) = GameGui::PixelToIndex(GetTouchPosition(0));
-        } else if (GetTouchPointCount()) {
-            leftButton = false;
-        }
         bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
 
         if (auto key = GetKeyPressed())
@@ -83,6 +76,14 @@ int main() {
 
         BeginDrawing();
         window.ClearBackground(LIGHTGRAY);
+
+        // debug code: this code verifies if MousePosition moves along with TouchPosition.
+        // This is required for raygui to work properly.
+        // if (GetTouchPointCount()) {
+        //     DrawCircleV(GetTouchPosition(0), 34, ORANGE);
+        //     DrawCircleV(GetMousePosition(), 22, RED);
+        // }
+
         switch(GetGameScene()) {
         case START_SCENE: {
             // TODO: de-duplicate these codes.

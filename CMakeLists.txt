@@ -22,13 +22,20 @@ if (NOT raylib_FOUND)
     include(FetchContent)
     FetchContent_Declare(
         raylib
-        URL      https://github.com/raysan5/raylib/archive/refs/tags/5.0.tar.gz
-        URL_HASH SHA256=98f049b9ea2a9c40a14e4e543eeea1a7ec3090ebdcd329c4ca2cf98bc9793482
+
+        # URL      https://github.com/raysan5/raylib/archive/refs/tags/5.0.tar.gz
+        # URL_HASH SHA256=98f049b9ea2a9c40a14e4e543eeea1a7ec3090ebdcd329c4ca2cf98bc9793482
+
         # Note that due to a long-unresolved bug in cmake
         # (still open and no one is working on it)
         # https://gitlab.kitware.com/cmake/cmake/-/issues/17770
         # GIT_SHALLOW is not shallow enough.
         # So, prefer URL if possible.
+        # But, I have to use most recent version from git...
+        # Let's switch back to URL when a newer tag (than 5.0) is available
+        # (after this is merged...) https://github.com/casavaca/raylib/commit/e23ad1c8f83b79759ca7c9f9794e563efcb12963
+        GIT_REPOSITORY https://github.com/casavaca/raylib.git
+        GIT_TAG master
     )
     FetchContent_MakeAvailable(raylib)
 endif()
