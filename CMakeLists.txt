@@ -123,7 +123,11 @@ endif()
 # (except you overwrite it and build all config to single location, see [this](https://discourse.cmake.org/t/changing-output-directories/8829), but not good.)
 #
 # So, we can't just use file(COPY ... DESTINATION ...) because it is too early to decide
-# where the actual destination is. Thus, we use POST_BUILD command
+# where the actual destination is.
+#
+# Now we have some options: PRE_BUILD, PRE_LINK, POST_BUILD.
+# POST_BUILD is too late for emscripten, which need to pack the resources.
+# PRE_BUILD should [generally be avoided](https://cmake.org/cmake/help/latest/command/add_custom_command.html#build-events), So we use PRE_LINK command
 if(CMAKE_CONFIGURATION_TYPES)
     # Multi-config generator (e.g., Visual Studio)
     set(BIN_DIR ${CMAKE_BINARY_DIR}/$<CONFIG>)
@@ -131,7 +135,7 @@ else()
     # Single-config generator (e.g., Makefile, Ninja)
     set(BIN_DIR ${CMAKE_BINARY_DIR}/)
 endif()
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
     COMMENT "Copying assets to the destination directory"
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/assets" ${BIN_DIR}/assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${raygui_SOURCE_DIR}/styles"      ${BIN_DIR}/assets/styles
