@@ -79,6 +79,7 @@ private:
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
     int  GetSubtype(Pos p) const {return state[p.row][p.col] & 3; }
+    void MoveBox(Pos p, Pos dp);
     bool IsBlocked(Pos p) const {return InBound(p) && (Get(p) & TILE_BLOCKED);     }
     bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_BOX);         }
     bool IsSpace  (Pos p) const {return InBound(p) && !(Get(p) & TILE_SPACE_MASK); }
@@ -91,7 +92,10 @@ private:
 private:
     Pos   playerPos;
     State state;
+    int32_t numBoxes;         // set on LoadLevel and never changes.
+    int32_t numBoxesOnTarget; // updated on LoadLevel and MoveBox
     std::vector<std::string> level;
+    // After each push, history contains new player Pos and dp
     std::stack<std::pair<Pos,Pos>> history;
     std::unordered_set<Pos, PosHash> accessCache;
 };

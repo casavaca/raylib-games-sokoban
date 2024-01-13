@@ -78,8 +78,12 @@ bool Sokoban::LoadLevel(const vector<string>& lines) {
     level = lines;
     for (int i=0; i<state.size(); i++) {
         for (int j=0; j<state[i].size(); j++) {
-            if(state[i][j] & TILE_PLAYER) {
+            if (state[i][j] & TILE_PLAYER) {
                 playerPos = Pos{j, i};
+            }
+            if (state[i][j] & TILE_BOX) {
+                numBoxes++;
+                numBoxesOnTarget += (state[i][j] & TILE_TARGET)?1:0;
             }
         }
     }
@@ -89,6 +93,8 @@ bool Sokoban::LoadLevel(const vector<string>& lines) {
 // operators
 Sokoban::Pos operator+(Sokoban::Pos a, Sokoban::Pos b) { return {a.row+b.row, a.col+b.col}; }
 Sokoban::Pos operator-(Sokoban::Pos a, Sokoban::Pos b) { return {a.row-b.row, a.col-b.col}; }
+Sokoban::Pos operator-(Sokoban::Pos a)                 { return {-a.row,     -a.col      }; }
+
 TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator&=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs & rhs); }
@@ -100,6 +106,25 @@ TileType& operator&=(TileType& lhs, int rhs)             { return lhs = static_c
 // |
 // v
 // y
+
+// unconditionally move box at p to p+dp.
+void Sokoban::MoveBox(Pos p, Pos dp) {
+    Pos newPos = p + dp;
+#if defined(DEBUG)
+    assert(Get(p) & TILE_BOX);
+    assert(IsSpace(newPos));
+#endif
+    Get(newPos) |= TILE_BOX;
+    Get(p)      &= ~TILE_BOX;
+    if ((Get(p) & TILE_TARGET) != (Get(newPos) & TILE_TARGET)) {
+        numBoxesOnTarget += (Get(newPos) & TILE_TARGET) ? 1 : -1;
+#if defined(DEBUG)
+        assert(numBoxesOnTarget >= 0);
+#endif
+    }
+    accessCache.clear();
+}
+
 void Sokoban::Push(int dy, int dx) {
     Pos dp = {dy, dx};
     Pos newPos = playerPos + dp;
@@ -108,13 +133,10 @@ void Sokoban::Push(int dy, int dx) {
     switch (state[newPos.row][newPos.col]) {
     case TILE_BOX:
     case TILE_BOX_ON_TARGET: {
-        Pos tmp = newPos + dp;
-        if (!IsSpace(tmp))
+        if (!IsSpace(newPos + dp))
             return SetPlayerPos(playerPos, dy,dx);
-        history.push({newPos, Pos{-dy,-dx}});
-        Get(tmp)    |= TILE_BOX;
-        Get(newPos) &= ~TILE_BOX;
-        accessCache.clear();
+        history.push({newPos, dp});
+        MoveBox(newPos, dp);
     } // FALLTHROUGH
     case TILE_SPACE:
     case TILE_TARGET:
@@ -132,11 +154,9 @@ void Sokoban::Pull(Pos lastPlayerPos, Pos dp) {
     assert(InBound(newPos) && IsSpace(newPos));
     assert(InBound(boxPos) && IsBox(boxPos));
 #endif
-    Get(boxPos) &= ~TILE_BOX;
-    Get(lastPlayerPos) |=  TILE_BOX;
     ClearPlayerPos();
     SetPlayerPos(newPos, -dp.row, -dp.col);
-    accessCache.clear();
+    MoveBox(boxPos, dp);
 }
 
 void Sokoban::Regret() {
@@ -144,7 +164,7 @@ void Sokoban::Regret() {
         return;
     auto [lastPlayerPos, dp] = history.top();
     history.pop();
-    Pull(lastPlayerPos, dp);
+    Pull(lastPlayerPos, -dp);
 }
 
 void Sokoban::SetPlayerPos(Pos p, int dy, int dx) {

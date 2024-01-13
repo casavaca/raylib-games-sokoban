@@ -17,7 +17,10 @@
 
 # Coding conventions:
 
-same as [raylib-coding-conventions](https://github.com/raysan5/raylib/wiki/raylib-coding-conventions)
+based on [raylib-coding-conventions](https://github.com/raysan5/raylib/wiki/raylib-coding-conventions)
+except that
+
++ `{` follows previous line.
 
 # TODO
 
