@@ -76,6 +76,12 @@ set_target_properties (${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PRIVATE    $<$<CONFIG:Debug>:-DDEBUG>)
 target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp)
 
+if (WIN32)
+    # For release build, hide the console.
+    target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>)
+    target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/ENTRY:mainCRTStartup>)
+endif()
+
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
     # Tell Emscripten to build an example.html file.
