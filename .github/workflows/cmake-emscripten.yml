@@ -25,7 +25,7 @@ jobs:
       run: |
         ls /home/runner/work/raylib-games-sokoban/raylib-games-sokoban/emsdk-cache/emsdk-main/upstream/emscripten
         emcc -v
-        emcmake --help
+        emcmake --version || :
 
     - uses: actions/checkout@v3
 
