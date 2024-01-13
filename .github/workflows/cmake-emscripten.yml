@@ -10,6 +10,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Environment
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
+
     - name: Setup emsdk
       uses: mymindstorm/setup-emsdk@v13
       with:
@@ -23,16 +30,8 @@ jobs:
 
     - name: Verify
       run: |
-        ls /home/runner/work/raylib-games-sokoban/raylib-games-sokoban/emsdk-cache/emsdk-main/upstream/emscripten
         emcc -v
         emcmake --version || :
-
-    - uses: actions/checkout@v3
-
-    - name: Setup Environment
-      run: |
-        sudo apt-get update -qq
-        sudo apt-get install -y --no-install-recommends libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
 
     - name: build
       run: |
