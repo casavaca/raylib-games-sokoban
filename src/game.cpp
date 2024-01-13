@@ -9,25 +9,6 @@
 
 using namespace std;
 
-static const char* defaultLevelStr = 
-        "_####__\n"
-        "_# .#__\n"
-        "_#  ###\n"
-        "_#*@  #\n"
-        "##  $ #\n"
-        "#   ###\n"
-        "#####__\n";
-
-static vector<string> Split(const string& target) {
-    string temp;
-    stringstream stringstream { target };
-    vector<string> result;
-    while (getline(stringstream, temp)) {
-        result.push_back(temp);
-    }
-    return result;
-}
-
 // static data.
 static constexpr TileType TxtMap(char c) {
     switch (c) {
@@ -44,38 +25,15 @@ static constexpr TileType TxtMap(char c) {
     }
 }
 
-static Sokoban::State ConvertFromTxt(const vector<string>& lines) {
-    // simple validation.
-    static string allowed = "#$@*._ ";
-
-    if(!lines.size()) return {};
-    auto nCol = max_element(lines.begin(), lines.end(),
-                                 [](auto a,auto b){return a.size()<b.size();})->size();
-    for (auto &s:lines) {
-        if (s.find_first_of("#") == s.npos) return {};
-        if (s.size() != nCol) return {};
-        if (s.find_first_not_of(allowed) != s.npos) return {};
-    }
-
-    Sokoban::State ret;
-    for (auto s:lines) {
-        ret.emplace_back();
-        transform(s.begin(), s.end(), back_inserter(ret.back()), TxtMap);
-    }
-    return ret;
-}
-
-bool Sokoban::LoadDefaultLevel() {
-    return Sokoban::LoadLevel(Split(defaultLevelStr));
-}
-
-bool Sokoban::LoadLevel(const vector<string>& lines) {
+bool Sokoban::LoadLevel(const Level& level) {
     Clear();
-    state = ConvertFromTxt(lines);
-    if (state.empty()) {
-        return false;
-    }
-    level = lines;
+    state = vector<vector<TileType>>(level.lines.size());
+    std::transform(level.lines.begin(), level.lines.end(), state.begin(), [](const string& s)->vector<TileType>{
+            // one liner in C++23 but we are just using C++17...
+            vector<TileType> ret(s.size());
+            std::transform(s.begin(), s.end(), ret.begin(), TxtMap);
+            return ret;
+    });
     for (int i=0; i<state.size(); i++) {
         for (int j=0; j<state[i].size(); j++) {
             if (state[i][j] & TILE_PLAYER) {
@@ -88,6 +46,22 @@ bool Sokoban::LoadLevel(const vector<string>& lines) {
         }
     }
     return true;
+}
+
+void Sokoban::LoadDefaultLevels() {
+    static const std::array defaultLevelStr {
+        "_####__",
+        "_# .#__",
+        "_#  ###",
+        "_#*@  #",
+        "##  $ #",
+        "#   ###",
+        "#####__",
+    };
+
+    levels   = {{"Default Level", vector<string>(defaultLevelStr.begin(), defaultLevelStr.end())}};
+    curLevel = 0;
+    LoadLevel(levels[curLevel]);
 }
 
 // operators

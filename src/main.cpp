@@ -18,7 +18,7 @@ int main() {
     GuiLoadStyle("assets/styles/cyber/cyber.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
     Sokoban game;
-    game.LoadDefaultLevel();
+    game.LoadDefaultLevels();
 
     GameGui::Init();
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second

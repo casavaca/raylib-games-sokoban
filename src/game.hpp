@@ -59,14 +59,18 @@ public:
             return std::hash<int64_t>()((1LL<<32) * p.row + p.col);
         }
     };
+    struct Level {
+        std::string              name;
+        std::vector<std::string> lines;
+    };
 
     using State = std::vector<std::vector<TileType>>;
-
 public:
-    bool LoadLevel(const std::vector<std::string>& lines);
-    bool LoadDefaultLevel();
+    bool LoadLevel(const Level& lines);
+    void LoadDefaultLevels();
+    int  LoadLevelsFromTxt();
     const State& GetState() const { return state; }
-    void Restart  (){ LoadLevel(level); }
+    void Restart  (){ LoadLevel(levels[curLevel]); }
     void PushNorth(){ Push(-1, 0); }
     void PushSouth(){ Push( 1, 0); }
     void PushEast (){ Push( 0, 1); }
@@ -94,7 +98,8 @@ private:
     State state;
     int32_t numBoxes;         // set on LoadLevel and never changes.
     int32_t numBoxesOnTarget; // updated on LoadLevel and MoveBox
-    std::vector<std::string> level;
+    std::vector<Level> levels;
+    int curLevel;
     // After each push, history contains new player Pos and dp
     std::stack<std::pair<Pos,Pos>> history;
     std::unordered_set<Pos, PosHash> accessCache;
