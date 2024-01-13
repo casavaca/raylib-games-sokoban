@@ -78,8 +78,13 @@ target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp)
 
 if (WIN32)
     # For release build, hide the console.
-    target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>)
-    target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/ENTRY:mainCRTStartup>)
+    # Oh, but windows defender is not happy with this hack.
+    # I believe one way to work around it is to make it a proper windows app.
+    # removing ENTRY:mainCRTStartup and define WinMain.
+    # change main to something like MyMain and call it from WinMain.
+    # But I've wasted enough time tweaking with windows, so leave a console there for now.
+    # target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>)
+    # target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/ENTRY:mainCRTStartup>)
 endif()
 
 # Web Configurations
