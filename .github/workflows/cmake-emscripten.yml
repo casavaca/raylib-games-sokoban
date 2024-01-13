@@ -28,14 +28,9 @@ jobs:
         #  so make sure it doesn't conflict with anything!
         actions-cache-folder: 'emsdk-cache'
 
-    - name: Verify
-      run: |
-        emcc -v
-        emcmake --version || :
-
     - name: build
       run: |
-        emcmake cmake --build ${{ github.workspace }}/build -DPLATFORM=Web
+        emcmake cmake -B ${{ github.workspace }}/build -DPLATFORM=Web
         cmake --build ${{ github.workspace }}/build
 
     - uses: actions/upload-artifact@v4
