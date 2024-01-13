@@ -89,7 +89,8 @@ jobs:
         cp ${{ github.workspace }}/build/sokoban.js     /tmp
         cp ${{ github.workspace }}/build/sokoban.data   /tmp
         cp ${{ github.workspace }}/build/sokoban.wasm   /tmp
-        cd /tmp; tar cf artifact.tar index.html sokoban.html sokoban.js sokoban.data sokoban.wasm
+        # https://github.com/actions/deploy-pages/issues/203
+        cd /tmp; tar cf artifact.tar ./index.html ./sokoban.html ./sokoban.js ./sokoban.data ./sokoban.wasm
 
     - name: Upload github-page artifact
       uses: actions/upload-artifact@v4
