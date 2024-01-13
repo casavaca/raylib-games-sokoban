@@ -22,7 +22,10 @@ jobs:
         actions-cache-folder: 'emsdk-cache'
 
     - name: Verify
-      run: emcc -v
+      run: |
+        ls /home/runner/work/raylib-games-sokoban/raylib-games-sokoban/emsdk-cache/emsdk-main/upstream/emscripten
+        emcc -v
+        emcmake --help
 
     - uses: actions/checkout@v3
 
