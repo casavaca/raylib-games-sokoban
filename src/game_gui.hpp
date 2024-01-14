@@ -12,8 +12,9 @@ GameScene GetGameScene();
 void SetGameScene(GameScene newScene);
 void Init();
 GameEvent Draw(raylib::Window& window, const Sokoban& game);
-void ProcessEvent(raylib::Window& window, Sokoban& game, GameEvent);
+// GuiEvent here means raygui interaction, e.g., button clicked.
+void ProcessGuiEvent(raylib::Window& window, Sokoban& game, GameEvent);
 std::pair<int,int> GetWindowSize(const Sokoban::State& state);
-std::pair<int,int> PixelToIndex(Vector2 pos);
+Sokoban::Pos PixelToPos(Vector2 pos);
 
 }

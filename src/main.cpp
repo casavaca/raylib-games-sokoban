@@ -37,7 +37,7 @@ int main() {
 
         // Update
         //----------------------------------------------------------------------------------
-        auto [nrow, ncol] = GameGui::PixelToIndex(GetMousePosition());
+        Sokoban::Pos pos = GameGui::PixelToPos(GetMousePosition());
         bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
                            IsMouseButtonDown(MOUSE_LEFT_BUTTON);
         bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
@@ -53,7 +53,7 @@ int main() {
                 SetGameScene(MAIN_GAME_SCENE);
             }
         } else if (leftButton) {
-            game.Click(nrow, ncol);
+            game.Click(pos);
         } else if (rightButton) {
             game.Regret();
         } else if (IsKeyPressed(lastKeyPressed) || IsKeyPressedRepeat(lastKeyPressed)) {
@@ -83,7 +83,7 @@ int main() {
         // }
 
         auto GuiEvent = GameGui::Draw(window, game);
-        GameGui::ProcessEvent(window, game, GuiEvent);
+        GameGui::ProcessGuiEvent(window, game, GuiEvent);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

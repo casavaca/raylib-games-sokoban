@@ -154,20 +154,19 @@ void Sokoban::ClearPlayerPos() {
     Get(playerPos) &= (~(TILE_PLAYER|3));
 }
 
-void Sokoban::Click(int nrow, int ncol) {
-    auto dis = abs(nrow - playerPos.row) + abs(ncol - playerPos.col);
+void Sokoban::Click(Pos pos) {
+    auto dis = abs(pos.row - playerPos.row) + abs(pos.col - playerPos.col);
     if (dis == 0) {
         return;
     }
     if (dis == 1) {
-        return Push(nrow - playerPos.row, ncol - playerPos.col);
+        return Push(pos.row - playerPos.row, pos.col - playerPos.col);
     }
-    Pos newPos{nrow, ncol};
-    if (!IsSpace(newPos))
+    if (!IsSpace(pos))
         return;
-    if (Accessible(playerPos, newPos)) {
+    if (Accessible(playerPos, pos)) {
         ClearPlayerPos();
-        SetPlayerPos(newPos, 1, 0);
+        SetPlayerPos(pos, 1, 0);
     }
 }
 bool Sokoban::Accessible(Pos s, Pos t) {
@@ -194,5 +193,21 @@ bool Sokoban::Accessible(Pos s, Pos t) {
         }
     }
     return accessCache.count(t);
+}
+
+void Sokoban::ProcessEvent(const std::vector<GameEvent>& events) {
+    for (auto e:events) switch (e) {
+        case GameEvent::EVENT_MOVE_UP:      { PushNorth(); } break;
+        case GameEvent::EVENT_MOVE_DOWN:    { PushSouth(); } break;
+        case GameEvent::EVENT_MOVE_LEFT:    { PushEast();  } break;
+        case GameEvent::EVENT_MOVE_RIGHT:   { PushWest();  } break;
+        case GameEvent::EVENT_MOVE_RESTART: { Restart();   } break;
+        case GameEvent::EVENT_MOVE_REGRET:  { Regret();    } break;
+        case GameEvent::EVENT_MOVE_CLICK: {
+        } break; // + row, col
+
+        case GameEvent::EVENT_NULL:
+        default: break;
+    }
 }
 

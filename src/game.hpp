@@ -7,6 +7,8 @@
 #include <string>
 #include <cstdint>
 
+#include "game_event.hpp"
+
 #if defined(DEBUG)
 #include <cassert>
 #endif
@@ -70,13 +72,14 @@ public:
     void LoadDefaultLevels();
     int  LoadLevelsFromTxt();
     const State& GetState() const { return state; }
+    void ProcessEvent(const std::vector<GameEvent>& events);
     void Restart  (){ LoadLevel(levels[curLevel]); }
     void PushNorth(){ Push(-1, 0); }
     void PushSouth(){ Push( 1, 0); }
     void PushEast (){ Push( 0, 1); }
     void PushWest (){ Push( 0,-1); }
     void Push(int dy, int dx);
-    void Click(int nrow, int ncol);
+    void Click(Pos pos);
     void Regret();
 private:
     void Pull(Pos LastPlayerPos, Pos dp);

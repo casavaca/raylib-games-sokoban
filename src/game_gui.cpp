@@ -80,7 +80,7 @@ std::pair<int,int> GetWindowSize(const Sokoban::State& state) {
             static_cast<int>(state[0].size()) * GetBlockPixels()};
 }
 
-std::pair<int,int> PixelToIndex(Vector2 pos) {
+Sokoban::Pos PixelToPos(Vector2 pos) {
     int nrow = static_cast<int>(pos.y) / GetBlockPixels();
     int ncol = static_cast<int>(pos.x) / GetBlockPixels();
     return {nrow, ncol};
@@ -134,7 +134,7 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
     return GameEvent::EVENT_NULL;
 }
 
-void ProcessEvent(raylib::Window& window, Sokoban& game, GameEvent e) {
+void ProcessGuiEvent(raylib::Window& window, Sokoban& game, GameEvent e) {
     switch (e) {
     case GameEvent::EVENT_MENU_START: {
         SetGameScene(MAIN_GAME_SCENE);
