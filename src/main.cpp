@@ -72,8 +72,6 @@ int main() {
         //----------------------------------------------------------------------------------
         // Draw
         //----------------------------------------------------------------------------------
-        Rectangle Rects[] = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
-
         BeginDrawing();
         window.ClearBackground(LIGHTGRAY);
 
@@ -84,50 +82,9 @@ int main() {
         //     DrawCircleV(GetMousePosition(), 22, RED);
         // }
 
-        switch(GetGameScene()) {
-        case START_SCENE: {
-            // TODO: de-duplicate these codes.
-            char textBoxText[64] = "Start";
-            bool textBoxEditMode = false;
-            if (GuiTextBox(Rects[0], textBoxText, 64, textBoxEditMode)) {
-                SetGameScene(MAIN_GAME_SCENE);
-                auto [screenWidth, screenHeight] = GameGui::GetWindowSize(game.GetState());
-                window.SetSize(screenWidth, screenHeight);
-            }
-            char exitBoxText[64] = "Exit";
-            bool exitBoxEditMode = false;
-            if (GuiTextBox(Rects[1], exitBoxText, 64, exitBoxEditMode)) {
-                return 0;
-            }
-        } break;
-        case ESC_SCENE: {
-            char resumeBoxText[64] = "Resume (SPACE)";
-            bool resumeBoxEditMode = false;
-            if (GuiTextBox(Rects[0], resumeBoxText, 64, resumeBoxEditMode)) {
-                SetGameScene(MAIN_GAME_SCENE);
-            }
-            char textBoxText[64] = "Restart (R)";
-            bool textBoxEditMode = false;
-            if (GuiTextBox(Rects[1], textBoxText, 64, textBoxEditMode)) {
-                SetGameScene(MAIN_GAME_SCENE);
-                game.Restart();
-            }
-            char exitBoxText[64] = "Exit";
-            bool exitBoxEditMode = false;
-            if (GuiTextBox(Rects[2], exitBoxText, 64, exitBoxEditMode)) {
-                return 0;
-            }
-        } break;
-        case MAIN_GAME_SCENE: {
-            auto expectedsize = GameGui::GetWindowSize(game.GetState());
-            if (GetScreenWidth () != expectedsize.first ||
-                GetScreenHeight() != expectedsize.second) {
-                window.SetSize(expectedsize.first, expectedsize.second);
-            }
-            GameGui::Draw(game.GetState());
-        } break;
-        default: break;
-        }
+        auto GuiEvent = GameGui::Draw(window, game);
+        GameGui::ProcessEvent(window, game, GuiEvent);
+
         EndDrawing();
         //----------------------------------------------------------------------------------
     }

@@ -1,4 +1,6 @@
 #include "game_gui.hpp"
+#include "game_event.hpp"
+#include "raygui.h"
 #include "raylib-cpp.hpp"
 
 #include <unordered_map>
@@ -54,7 +56,7 @@ void Init() {
     g_pngs[TILE_PLAYER_W_ON_TARGET ] = {&g_basePng[TILE_SPACE], &g_basePng[TILE_PLAYER_W]};
 }
 
-void Draw(const Sokoban::State& state) {
+static void DrawGameScene(const Sokoban::State& state) {
     const int blockPixels = g_basePng[TILE_NULL].GetWidth();
     for (int i=0; i<state.size(); i++) {
         for (int j=0; j<state[i].size(); j++) {
@@ -84,4 +86,80 @@ std::pair<int,int> PixelToIndex(Vector2 pos) {
     return {nrow, ncol};
 }
 
+GameEvent Draw(raylib::Window& window, const Sokoban& game) {
+    Rectangle Rects[] = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
+
+    switch(GetGameScene()) {
+    case START_SCENE: {
+        // TODO: de-duplicate these codes.
+        char textBoxText[64] = "Start";
+        bool textBoxEditMode = false;
+        if (GuiTextBox(Rects[0], textBoxText, 64, textBoxEditMode)) {
+            return GameEvent::EVENT_MENU_START;
+        }
+        char exitBoxText[64] = "Exit";
+        bool exitBoxEditMode = false;
+        if (GuiTextBox(Rects[1], exitBoxText, 64, exitBoxEditMode)) {
+            return GameEvent::EVENT_MENU_EXIT;
+        }
+    } break;
+    case ESC_SCENE: {
+        char resumeBoxText[64] = "Resume (SPACE)";
+        bool resumeBoxEditMode = false;
+        if (GuiTextBox(Rects[0], resumeBoxText, 64, resumeBoxEditMode)) {
+            return GameEvent::EVENT_MENU_RESUME;
+        }
+        char textBoxText[64] = "Restart (R)";
+        bool textBoxEditMode = false;
+        if (GuiTextBox(Rects[1], textBoxText, 64, textBoxEditMode)) {
+            SetGameScene(MAIN_GAME_SCENE);
+            return GameEvent::EVENT_MENU_RESTART;
+        }
+        char exitBoxText[64] = "Exit";
+        bool exitBoxEditMode = false;
+        if (GuiTextBox(Rects[2], exitBoxText, 64, exitBoxEditMode)) {
+            return GameEvent::EVENT_MENU_EXIT;
+        }
+    } break;
+    case MAIN_GAME_SCENE: {
+        auto expectedsize = GameGui::GetWindowSize(game.GetState());
+        if (GetScreenWidth () != expectedsize.first ||
+            GetScreenHeight() != expectedsize.second) {
+            window.SetSize(expectedsize.first, expectedsize.second);
+        }
+        DrawGameScene(game.GetState());
+    } break;
+    default: break;
+    }
+    return GameEvent::EVENT_NULL;
 }
+
+void ProcessEvent(raylib::Window& window, Sokoban& game, GameEvent e) {
+    switch (e) {
+    case GameEvent::EVENT_MENU_START: {
+        SetGameScene(MAIN_GAME_SCENE);
+        auto [screenWidth, screenHeight] = GameGui::GetWindowSize(game.GetState());
+        window.SetSize(screenWidth, screenHeight);
+    } break;
+    case GameEvent::EVENT_MENU_EXIT: {
+        exit(0);
+    } break;
+    case GameEvent::EVENT_MENU_RESTART: {
+        SetGameScene(MAIN_GAME_SCENE);
+        game.Restart();
+    } break;
+    case GameEvent::EVENT_MENU_RESUME: {
+        SetGameScene(MAIN_GAME_SCENE);
+    } break;
+    case GameEvent::EVENT_NULL:
+        break;
+    default: {
+#if defined(DEBUG)
+        assert(false);
+#endif
+    }
+    }
+}
+
+}
+
