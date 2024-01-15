@@ -7,6 +7,8 @@
 #include <string>
 #include <cstdint>
 
+#include "game_event.hpp"
+
 #if defined(DEBUG)
 #include <cassert>
 #endif
@@ -59,26 +61,35 @@ public:
             return std::hash<int64_t>()((1LL<<32) * p.row + p.col);
         }
     };
+    struct Level {
+        std::string              name;
+        std::vector<std::string> lines;
+    };
 
     using State = std::vector<std::vector<TileType>>;
-
 public:
-    bool LoadLevel(const std::vector<std::string>& lines);
-    bool LoadDefaultLevel();
+    bool LoadLevel(const Level& lines);
+    void LoadDefaultLevels();
+    int  LoadLevelsFromTxt();
     const State& GetState() const { return state; }
-    void Restart  (){ LoadLevel(level); }
+    void ProcessEvent(const std::vector<GameEvent>& events, const Pos& pos);
+    void Restart  (){ LoadLevel(levels[curLevel]); }
     void PushNorth(){ Push(-1, 0); }
     void PushSouth(){ Push( 1, 0); }
     void PushEast (){ Push( 0, 1); }
     void PushWest (){ Push( 0,-1); }
     void Push(int dy, int dx);
-    void Click(int nrow, int ncol);
+    void Click(Pos pos);
     void Regret();
+    bool IsLastLevel() const { return curLevel == levels.size() - 1; }
+    void NextLevel() { curLevel++; Restart(); }
+    bool LevelCompleted() const { return numBoxes == numBoxesOnTarget; }
 private:
     void Pull(Pos LastPlayerPos, Pos dp);
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
     int  GetSubtype(Pos p) const {return state[p.row][p.col] & 3; }
+    void MoveBox(Pos p, Pos dp);
     bool IsBlocked(Pos p) const {return InBound(p) && (Get(p) & TILE_BLOCKED);     }
     bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_BOX);         }
     bool IsSpace  (Pos p) const {return InBound(p) && !(Get(p) & TILE_SPACE_MASK); }
@@ -87,11 +98,15 @@ private:
     bool Accessible(Pos s, Pos t);
     void ClearPlayerPos();
     void SetPlayerPos(Pos p, int dy, int dx);
-    void Clear() {history={}; accessCache.clear();}
+    void Clear() {numBoxes = numBoxesOnTarget = 0; history={}; accessCache.clear();}
 private:
     Pos   playerPos;
     State state;
-    std::vector<std::string> level;
+    int32_t numBoxes;         // set on LoadLevel and never changes.
+    int32_t numBoxesOnTarget; // updated on LoadLevel and MoveBox
+    std::vector<Level> levels;
+    int curLevel;
+    // After each push, history contains new player Pos and dp
     std::stack<std::pair<Pos,Pos>> history;
     std::unordered_set<Pos, PosHash> accessCache;
 };

@@ -9,25 +9,6 @@
 
 using namespace std;
 
-static const char* defaultLevelStr = 
-        "_####__\n"
-        "_# .#__\n"
-        "_#  ###\n"
-        "_#*@  #\n"
-        "##  $ #\n"
-        "#   ###\n"
-        "#####__\n";
-
-static vector<string> Split(const string& target) {
-    string temp;
-    stringstream stringstream { target };
-    vector<string> result;
-    while (getline(stringstream, temp)) {
-        result.push_back(temp);
-    }
-    return result;
-}
-
 // static data.
 static constexpr TileType TxtMap(char c) {
     switch (c) {
@@ -44,51 +25,57 @@ static constexpr TileType TxtMap(char c) {
     }
 }
 
-static Sokoban::State ConvertFromTxt(const vector<string>& lines) {
-    // simple validation.
-    static string allowed = "#$@*._ ";
-
-    if(!lines.size()) return {};
-    auto nCol = max_element(lines.begin(), lines.end(),
-                                 [](auto a,auto b){return a.size()<b.size();})->size();
-    for (auto &s:lines) {
-        if (s.find_first_of("#") == s.npos) return {};
-        if (s.size() != nCol) return {};
-        if (s.find_first_not_of(allowed) != s.npos) return {};
-    }
-
-    Sokoban::State ret;
-    for (auto s:lines) {
-        ret.emplace_back();
-        transform(s.begin(), s.end(), back_inserter(ret.back()), TxtMap);
-    }
-    return ret;
-}
-
-bool Sokoban::LoadDefaultLevel() {
-    return Sokoban::LoadLevel(Split(defaultLevelStr));
-}
-
-bool Sokoban::LoadLevel(const vector<string>& lines) {
+bool Sokoban::LoadLevel(const Level& level) {
     Clear();
-    state = ConvertFromTxt(lines);
-    if (state.empty()) {
-        return false;
-    }
-    level = lines;
+    state = vector<vector<TileType>>(level.lines.size());
+    std::transform(level.lines.begin(), level.lines.end(), state.begin(), [](const string& s)->vector<TileType>{
+            // one liner in C++23 but we are just using C++17...
+            vector<TileType> ret(s.size());
+            std::transform(s.begin(), s.end(), ret.begin(), TxtMap);
+            return ret;
+    });
     for (int i=0; i<state.size(); i++) {
         for (int j=0; j<state[i].size(); j++) {
-            if(state[i][j] & TILE_PLAYER) {
+            if (state[i][j] & TILE_PLAYER) {
                 playerPos = Pos{j, i};
+            }
+            if (state[i][j] & TILE_BOX) {
+                numBoxes++;
+                numBoxesOnTarget += (state[i][j] & TILE_TARGET)?1:0;
             }
         }
     }
     return true;
 }
 
+void Sokoban::LoadDefaultLevels() {
+    static const std::array defaultLevel0 {
+        "######",
+        "#@$ .#",
+        "######",
+    };
+    static const std::array defaultLevel1 {
+        "_####__",
+        "_# .#__",
+        "_#  ###",
+        "_#*@  #",
+        "##  $ #",
+        "#   ###",
+        "#####__",
+    };
+
+    levels   = {{"debug level"  , vector<string>(defaultLevel0.begin(), defaultLevel0.end())},
+                {"Default Level", vector<string>(defaultLevel1.begin(), defaultLevel1.end())},
+                };
+    curLevel = 0;
+    LoadLevel(levels[curLevel]);
+}
+
 // operators
 Sokoban::Pos operator+(Sokoban::Pos a, Sokoban::Pos b) { return {a.row+b.row, a.col+b.col}; }
 Sokoban::Pos operator-(Sokoban::Pos a, Sokoban::Pos b) { return {a.row-b.row, a.col-b.col}; }
+Sokoban::Pos operator-(Sokoban::Pos a)                 { return {-a.row,     -a.col      }; }
+
 TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
 TileType& operator&=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs & rhs); }
@@ -100,6 +87,25 @@ TileType& operator&=(TileType& lhs, int rhs)             { return lhs = static_c
 // |
 // v
 // y
+
+// unconditionally move box at p to p+dp.
+void Sokoban::MoveBox(Pos p, Pos dp) {
+    Pos newPos = p + dp;
+#if defined(DEBUG)
+    assert(Get(p) & TILE_BOX);
+    assert(IsSpace(newPos));
+#endif
+    Get(newPos) |= TILE_BOX;
+    Get(p)      &= ~TILE_BOX;
+    if ((Get(p) & TILE_TARGET) != (Get(newPos) & TILE_TARGET)) {
+        numBoxesOnTarget += (Get(newPos) & TILE_TARGET) ? 1 : -1;
+#if defined(DEBUG)
+        assert(numBoxesOnTarget >= 0);
+#endif
+    }
+    accessCache.clear();
+}
+
 void Sokoban::Push(int dy, int dx) {
     Pos dp = {dy, dx};
     Pos newPos = playerPos + dp;
@@ -108,13 +114,10 @@ void Sokoban::Push(int dy, int dx) {
     switch (state[newPos.row][newPos.col]) {
     case TILE_BOX:
     case TILE_BOX_ON_TARGET: {
-        Pos tmp = newPos + dp;
-        if (!IsSpace(tmp))
+        if (!IsSpace(newPos + dp))
             return SetPlayerPos(playerPos, dy,dx);
-        history.push({newPos, Pos{-dy,-dx}});
-        Get(tmp)    |= TILE_BOX;
-        Get(newPos) &= ~TILE_BOX;
-        accessCache.clear();
+        history.push({newPos, dp});
+        MoveBox(newPos, dp);
     } // FALLTHROUGH
     case TILE_SPACE:
     case TILE_TARGET:
@@ -132,11 +135,9 @@ void Sokoban::Pull(Pos lastPlayerPos, Pos dp) {
     assert(InBound(newPos) && IsSpace(newPos));
     assert(InBound(boxPos) && IsBox(boxPos));
 #endif
-    Get(boxPos) &= ~TILE_BOX;
-    Get(lastPlayerPos) |=  TILE_BOX;
     ClearPlayerPos();
     SetPlayerPos(newPos, -dp.row, -dp.col);
-    accessCache.clear();
+    MoveBox(boxPos, dp);
 }
 
 void Sokoban::Regret() {
@@ -144,7 +145,7 @@ void Sokoban::Regret() {
         return;
     auto [lastPlayerPos, dp] = history.top();
     history.pop();
-    Pull(lastPlayerPos, dp);
+    Pull(lastPlayerPos, -dp);
 }
 
 void Sokoban::SetPlayerPos(Pos p, int dy, int dx) {
@@ -160,20 +161,19 @@ void Sokoban::ClearPlayerPos() {
     Get(playerPos) &= (~(TILE_PLAYER|3));
 }
 
-void Sokoban::Click(int nrow, int ncol) {
-    auto dis = abs(nrow - playerPos.row) + abs(ncol - playerPos.col);
+void Sokoban::Click(Pos pos) {
+    auto dis = abs(pos.row - playerPos.row) + abs(pos.col - playerPos.col);
     if (dis == 0) {
         return;
     }
     if (dis == 1) {
-        return Push(nrow - playerPos.row, ncol - playerPos.col);
+        return Push(pos.row - playerPos.row, pos.col - playerPos.col);
     }
-    Pos newPos{nrow, ncol};
-    if (!IsSpace(newPos))
+    if (!IsSpace(pos))
         return;
-    if (Accessible(playerPos, newPos)) {
+    if (Accessible(playerPos, pos)) {
         ClearPlayerPos();
-        SetPlayerPos(newPos, 1, 0);
+        SetPlayerPos(pos, 1, 0);
     }
 }
 bool Sokoban::Accessible(Pos s, Pos t) {
@@ -200,5 +200,20 @@ bool Sokoban::Accessible(Pos s, Pos t) {
         }
     }
     return accessCache.count(t);
+}
+
+void Sokoban::ProcessEvent(const std::vector<GameEvent>& events,
+                           const Sokoban::Pos& pos) {
+    for (auto e:events) switch (e) {
+        case GameEvent::EVENT_MOVE_UP:      { PushNorth(); } break;
+        case GameEvent::EVENT_MOVE_DOWN:    { PushSouth(); } break;
+        case GameEvent::EVENT_MOVE_LEFT:    { PushWest();  } break;
+        case GameEvent::EVENT_MOVE_RIGHT:   { PushEast();  } break;
+        case GameEvent::EVENT_MOVE_RESTART: { Restart();   } break;
+        case GameEvent::EVENT_MOVE_REGRET:  { Regret();    } break;
+        case GameEvent::EVENT_MOVE_CLICK:   { Click(pos);  } break; // + row, col
+        case GameEvent::EVENT_NULL:
+        default: break;
+    }
 }
 
