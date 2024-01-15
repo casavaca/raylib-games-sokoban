@@ -83,6 +83,10 @@ set_target_properties (${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PRIVATE    $<$<CONFIG:Debug>:-DDEBUG>)
 target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-pedantic -Wimplicit-fallthrough -Wall -Wextra -Wno-unused-function -Wno-sign-compare -Werror>)
+endif()
+
 if (WIN32)
     # For release build, hide the console.
     # Oh, but windows defender is not happy with this hack.

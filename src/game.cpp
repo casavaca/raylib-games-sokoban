@@ -118,13 +118,14 @@ void Sokoban::Push(int dy, int dx) {
             return SetPlayerPos(playerPos, dy,dx);
         history.push({newPos, dp});
         MoveBox(newPos, dp);
-    } // FALLTHROUGH
+    } [[fallthrough]];
     case TILE_SPACE:
-    case TILE_TARGET:
+    case TILE_TARGET: {
         ClearPlayerPos();
         SetPlayerPos(newPos, dy, dx);
+    } break;
     default:
-        SetPlayerPos(playerPos, dy,dx);
+        SetPlayerPos(playerPos, dy, dx);
     }
 }
 

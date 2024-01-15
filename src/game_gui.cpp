@@ -2,7 +2,6 @@
 #include "game_event.hpp"
 #include "game_config.hpp"
 #include "raygui.h"
-#include "raylib-cpp.hpp"
 #include "raylib.h"
 
 #include <unordered_map>
@@ -191,7 +190,6 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
             if (CreateButton(button))
                 ret = button.event;
     } break;
-    // TODO: warn if break is forgotten.
     case MAIN_GAME_SCENE: {
         DrawGameScene(game.GetState());
     } break;
