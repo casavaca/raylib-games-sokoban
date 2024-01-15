@@ -6,14 +6,19 @@
 
 namespace GameGui {
 
-enum GameScene : uint8_t { START_SCENE, MAIN_GAME_SCENE, ESC_SCENE };
+enum GameScene : uint8_t {
+    START_SCENE,
+    MAIN_GAME_SCENE,
+    ESC_SCENE,
+    LEVEL_FINISHED_SCENE,
+};
 
 GameScene GetGameScene();
 void SetGameScene(GameScene newScene);
 void Init();
 
 // CookInputEvent just translates kbd/mouse event into GameEvent
-std::pair<std::vector<GameEvent>, GameEvent> CookInputEvent(void);
+std::pair<std::vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game);
 
 // GuiEvent here means raygui interaction, e.g., button clicked.
 GameEvent Draw(raylib::Window& window, const Sokoban& game);

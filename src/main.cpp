@@ -13,7 +13,7 @@ int main() {
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    raylib::Window window(600, 400, "sokoban");
+    raylib::Window window(800, 600, "sokoban");
 
     GuiLoadStyle("assets/styles/cyber/cyber.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
@@ -30,7 +30,7 @@ int main() {
         // Update
         //----------------------------------------------------------------------------------
         Sokoban::Pos pos = GameGui::PixelToPos(GetMousePosition());
-        auto [gameEvents, guiEvent] = GameGui::CookInputEvent();
+        auto [gameEvents, guiEvent] = GameGui::CookInputEvent(game);
         game.ProcessEvent(gameEvents, pos);
         GameGui::ProcessGuiEvent(guiEvent, game);
 

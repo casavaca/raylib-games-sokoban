@@ -78,8 +78,8 @@ static int GetBlockPixels() {
 }
 
 std::pair<int,int> GetWindowSize(const Sokoban::State& state) {
-    return {static_cast<int>(state.size()) * GetBlockPixels(),
-            static_cast<int>(state[0].size()) * GetBlockPixels()};
+    return {static_cast<int>(state[0].size()) * GetBlockPixels(),
+            static_cast<int>(state.size())    * GetBlockPixels()};
 }
 
 Sokoban::Pos PixelToPos(Vector2 pos) {
@@ -88,7 +88,7 @@ Sokoban::Pos PixelToPos(Vector2 pos) {
     return {nrow, ncol};
 }
 
-pair<vector<GameEvent>, GameEvent> CookInputEvent(void) {
+pair<vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game) {
     static int lastKeyPressed = KEY_NULL;
     bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
                        IsMouseButtonDown(MOUSE_LEFT_BUTTON);
@@ -100,8 +100,12 @@ pair<vector<GameEvent>, GameEvent> CookInputEvent(void) {
         guiEvent = GameEvent::EVENT_MENU_PAUSE;
     }
 
-    if(GetGameScene() != MAIN_GAME_SCENE) {
+    if (GetGameScene() != MAIN_GAME_SCENE) {
         return {{}, guiEvent};
+    }
+
+    if (game.LevelCompleted()) {
+        return {{}, GameEvent::EVENT_MENU_LEVEL_FINISHED};
     }
 
     // TODO: add option for keyboard layout / AWERTY?
@@ -127,6 +131,7 @@ pair<vector<GameEvent>, GameEvent> CookInputEvent(void) {
 
 // TODO: prototyping.
 struct MyGuiButton {
+    bool disabled;
     const char* text;
     int shortcutKey;
     GameEvent event;
@@ -134,20 +139,40 @@ struct MyGuiButton {
 
 GameEvent Draw(raylib::Window& window, const Sokoban& game) {
 
-    Rectangle   rects[]  = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
+    // TODO: get rid of the magic numbers.
+    Rectangle   rects[]  = {{ 45, 115, 425, 60 }, { 45, 215, 425, 60 }, { 45, 315, 425, 60 }};
     int         numRects = 0;
 
-    MyGuiButton startButton   { "Start (SPACE)" , KEY_SPACE, GameEvent::EVENT_MENU_START   };
-    MyGuiButton resumeButton  { "Resume (SPACE)", KEY_SPACE, GameEvent::EVENT_MENU_RESUME  };
-    MyGuiButton restartButton { "Restart (R)"   , KEY_R,     GameEvent::EVENT_MENU_RESTART };
-    MyGuiButton quitButton    { "Quit (Q)"      , KEY_Q,     GameEvent::EVENT_MENU_EXIT    };
+    MyGuiButton nextLevelButton    { false, "Next Level (SPACE)" , KEY_SPACE, GameEvent::EVENT_MENU_NEXT_LEVEL };
+    MyGuiButton noMoreLevelsButton { true,  "All Level Completed", KEY_NULL,  GameEvent::EVENT_NULL            };
+    MyGuiButton startButton        { false, "Start (SPACE)"      , KEY_SPACE, GameEvent::EVENT_MENU_START      };
+    MyGuiButton resumeButton       { false, "Resume (SPACE)"     , KEY_SPACE, GameEvent::EVENT_MENU_RESUME     };
+    MyGuiButton restartButton      { false, "Restart (R)"        , KEY_R,     GameEvent::EVENT_MENU_RESTART    };
+    MyGuiButton quitButton         { false, "Quit (Q)"           , KEY_Q,     GameEvent::EVENT_MENU_EXIT       };
 
     auto CreateButton = [&rects, &numRects](const MyGuiButton& b)->bool{
         GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
-        return (IsKeyPressed(b.shortcutKey) || GuiButton(rects[numRects++], b.text));
+        if (b.disabled) {
+            GuiSetState(STATE_DISABLED);
+            GuiButton(rects[numRects++], b.text);
+            GuiSetState(STATE_NORMAL);
+            return false;
+        } else {
+            return (IsKeyPressed(b.shortcutKey) || GuiButton(rects[numRects++], b.text));
+        }
     };
 
     auto ret = GameEvent::EVENT_NULL;
+
+    int expectedWidth  = 800;
+    int expectedHeight = 600;
+    if (GetGameScene() == MAIN_GAME_SCENE) {
+        tie(expectedWidth, expectedHeight) = GameGui::GetWindowSize(game.GetState());
+    }
+    if (GetScreenWidth () != expectedWidth ||
+        GetScreenHeight() != expectedHeight) {
+        window.SetSize(expectedWidth, expectedHeight);
+    }
 
     // NOTE: There will be 1 frame tear if we return early.
     switch(GetGameScene()) {
@@ -161,12 +186,13 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
             if (CreateButton(button))
                 ret = button.event;
     } break;
+    case LEVEL_FINISHED_SCENE: {
+        for (auto& button : {game.IsLastLevel() ? noMoreLevelsButton : nextLevelButton, restartButton, quitButton})
+            if (CreateButton(button))
+                ret = button.event;
+    } break;
+    // TODO: warn if break is forgotten.
     case MAIN_GAME_SCENE: {
-        auto expectedsize = GameGui::GetWindowSize(game.GetState());
-        if (GetScreenWidth () != expectedsize.first ||
-            GetScreenHeight() != expectedsize.second) {
-            window.SetSize(expectedsize.first, expectedsize.second);
-        }
         DrawGameScene(game.GetState());
     } break;
     default: break;
@@ -191,6 +217,16 @@ void ProcessGuiEvent(GameEvent e, Sokoban& game) {
     } break;
     case GameEvent::EVENT_MENU_RESUME: {
         SetGameScene(MAIN_GAME_SCENE);
+    } break;
+    case GameEvent::EVENT_MENU_LEVEL_FINISHED: {
+        SetGameScene(LEVEL_FINISHED_SCENE);
+    } break;
+    case GameEvent::EVENT_MENU_NEXT_LEVEL: {
+        SetGameScene(MAIN_GAME_SCENE);
+#if defined(DEBUG)
+        assert(!game.IsLastLevel());
+#endif
+        game.NextLevel();
     } break;
     case GameEvent::EVENT_NULL:
         break;

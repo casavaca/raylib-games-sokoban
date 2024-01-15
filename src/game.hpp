@@ -81,6 +81,9 @@ public:
     void Push(int dy, int dx);
     void Click(Pos pos);
     void Regret();
+    bool IsLastLevel() const { return curLevel == levels.size() - 1; }
+    void NextLevel() { curLevel++; Restart(); }
+    bool LevelCompleted() const { return numBoxes == numBoxesOnTarget; }
 private:
     void Pull(Pos LastPlayerPos, Pos dp);
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
@@ -95,7 +98,7 @@ private:
     bool Accessible(Pos s, Pos t);
     void ClearPlayerPos();
     void SetPlayerPos(Pos p, int dy, int dx);
-    void Clear() {history={}; accessCache.clear();}
+    void Clear() {numBoxes = numBoxesOnTarget = 0; history={}; accessCache.clear();}
 private:
     Pos   playerPos;
     State state;

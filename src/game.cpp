@@ -49,7 +49,12 @@ bool Sokoban::LoadLevel(const Level& level) {
 }
 
 void Sokoban::LoadDefaultLevels() {
-    static const std::array defaultLevelStr {
+    static const std::array defaultLevel0 {
+        "######",
+        "#@$ .#",
+        "######",
+    };
+    static const std::array defaultLevel1 {
         "_####__",
         "_# .#__",
         "_#  ###",
@@ -59,7 +64,9 @@ void Sokoban::LoadDefaultLevels() {
         "#####__",
     };
 
-    levels   = {{"Default Level", vector<string>(defaultLevelStr.begin(), defaultLevelStr.end())}};
+    levels   = {{"debug level"  , vector<string>(defaultLevel0.begin(), defaultLevel0.end())},
+                {"Default Level", vector<string>(defaultLevel1.begin(), defaultLevel1.end())},
+                };
     curLevel = 0;
     LoadLevel(levels[curLevel]);
 }
