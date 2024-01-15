@@ -125,44 +125,41 @@ pair<vector<GameEvent>, GameEvent> CookInputEvent(void) {
     return {gameEvents,guiEvent};
 }
 
-GameEvent Draw(raylib::Window& window, const Sokoban& game) {
-    Rectangle Rects[] = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
+// TODO: prototyping.
+struct MyGuiButton {
+    const char* text;
+    int shortcutKey;
+    GameEvent event;
+};
 
-    // TODO: de-duplicate these codes.
-    //     : better shortcut support.
-    // TODO: should use IsKeyPressed
+GameEvent Draw(raylib::Window& window, const Sokoban& game) {
+
+    Rectangle   rects[]  = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
+    int         numRects = 0;
+
+    MyGuiButton startButton   { "Start (SPACE)" , KEY_SPACE, GameEvent::EVENT_MENU_START   };
+    MyGuiButton resumeButton  { "Resume (SPACE)", KEY_SPACE, GameEvent::EVENT_MENU_RESUME  };
+    MyGuiButton restartButton { "Restart (R)"   , KEY_R,     GameEvent::EVENT_MENU_RESTART };
+    MyGuiButton quitButton    { "Quit (Q)"      , KEY_Q,     GameEvent::EVENT_MENU_EXIT    };
+
+    auto CreateButton = [&rects, &numRects](const MyGuiButton& b)->bool{
+        GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+        return (IsKeyPressed(b.shortcutKey) || GuiButton(rects[numRects++], b.text));
+    };
+
+    auto ret = GameEvent::EVENT_NULL;
+
+    // NOTE: There will be 1 frame tear if we return early.
     switch(GetGameScene()) {
     case START_SCENE: {
-        auto key = GetKeyPressed();
-        char textBoxText[64] = "Start (SPACE)";
-        bool textBoxEditMode = false;
-        if (key == ' ' || GuiTextBox(Rects[0], textBoxText, 64, textBoxEditMode)) {
-            return GameEvent::EVENT_MENU_START;
-        }
-        char exitBoxText[64] = "Exit (Q)";
-        bool exitBoxEditMode = false;
-        if (key == KEY_Q || GuiTextBox(Rects[1], exitBoxText, 64, exitBoxEditMode)) {
-            return GameEvent::EVENT_MENU_EXIT;
-        }
+        for (auto& button : {startButton, quitButton})
+            if (CreateButton(button))
+                ret = button.event;
     } break;
     case ESC_SCENE: {
-        auto key = GetKeyPressed();
-        char resumeBoxText[64] = "Resume (SPACE)";
-        bool resumeBoxEditMode = false;
-        if (key == ' ' || GuiTextBox(Rects[0], resumeBoxText, 64, resumeBoxEditMode)) {
-            return GameEvent::EVENT_MENU_RESUME;
-        }
-        char textBoxText[64] = "Restart (R)";
-        bool textBoxEditMode = false;
-        if (key == KEY_R || GuiTextBox(Rects[1], textBoxText, 64, textBoxEditMode)) {
-            SetGameScene(MAIN_GAME_SCENE);
-            return GameEvent::EVENT_MENU_RESTART;
-        }
-        char exitBoxText[64] = "Exit (Q)";
-        bool exitBoxEditMode = false;
-        if (key == KEY_Q || GuiTextBox(Rects[2], exitBoxText, 64, exitBoxEditMode)) {
-            return GameEvent::EVENT_MENU_EXIT;
-        }
+        for (auto& button : {resumeButton, restartButton, quitButton})
+            if (CreateButton(button))
+                ret = button.event;
     } break;
     case MAIN_GAME_SCENE: {
         auto expectedsize = GameGui::GetWindowSize(game.GetState());
@@ -174,7 +171,7 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
     } break;
     default: break;
     }
-    return GameEvent::EVENT_NULL;
+    return ret;
 }
 
 void ProcessGuiEvent(GameEvent e, Sokoban& game) {
