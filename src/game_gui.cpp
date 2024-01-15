@@ -1,7 +1,9 @@
 #include "game_gui.hpp"
 #include "game_event.hpp"
+#include "game_config.hpp"
 #include "raygui.h"
 #include "raylib-cpp.hpp"
+#include "raylib.h"
 
 #include <unordered_map>
 #include <cstdint>
@@ -86,38 +88,79 @@ Sokoban::Pos PixelToPos(Vector2 pos) {
     return {nrow, ncol};
 }
 
+pair<vector<GameEvent>, GameEvent> CookInputEvent(void) {
+    static int lastKeyPressed = KEY_NULL;
+    bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
+                       IsMouseButtonDown(MOUSE_LEFT_BUTTON);
+    bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
+    std::vector<GameEvent> gameEvents;
+    GameEvent guiEvent = GameEvent::EVENT_NULL;
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        guiEvent = GameEvent::EVENT_MENU_PAUSE;
+    }
+
+    if(GetGameScene() != MAIN_GAME_SCENE) {
+        return {{}, guiEvent};
+    }
+
+    // TODO: add option for keyboard layout / AWERTY?
+    if (auto key = GetKeyPressed())
+        lastKeyPressed = key;
+
+    if (leftButton) {
+        gameEvents.push_back(GameEvent::EVENT_MOVE_CLICK);
+    }
+    if (rightButton) {
+        gameEvents.push_back(GameEvent::EVENT_MOVE_REGRET);
+    } else if (IsKeyPressed(lastKeyPressed) || IsKeyPressedRepeat(lastKeyPressed)) {
+        auto key = lastKeyPressed;
+        if (GameConfig::IsUp     (key)) { gameEvents.push_back(GameEvent::EVENT_MOVE_UP);     }
+        if (GameConfig::IsDown   (key)) { gameEvents.push_back(GameEvent::EVENT_MOVE_DOWN);   }
+        if (GameConfig::IsRight  (key)) { gameEvents.push_back(GameEvent::EVENT_MOVE_RIGHT);  }
+        if (GameConfig::IsLeft   (key)) { gameEvents.push_back(GameEvent::EVENT_MOVE_LEFT);   }
+        if (GameConfig::IsRestart(key)) { gameEvents.push_back(GameEvent::EVENT_MOVE_RESTART);}
+        if (GameConfig::IsRegret (key)) { gameEvents.push_back(GameEvent::EVENT_MOVE_REGRET); }
+    }
+    return {gameEvents,guiEvent};
+}
+
 GameEvent Draw(raylib::Window& window, const Sokoban& game) {
     Rectangle Rects[] = {{ 45, 115, 325, 60 }, { 45, 215, 325, 60 }, { 45, 315, 325, 60 }};
 
+    // TODO: de-duplicate these codes.
+    //     : better shortcut support.
+    // TODO: should use IsKeyPressed
     switch(GetGameScene()) {
     case START_SCENE: {
-        // TODO: de-duplicate these codes.
-        char textBoxText[64] = "Start";
+        auto key = GetKeyPressed();
+        char textBoxText[64] = "Start (SPACE)";
         bool textBoxEditMode = false;
-        if (GuiTextBox(Rects[0], textBoxText, 64, textBoxEditMode)) {
+        if (key == ' ' || GuiTextBox(Rects[0], textBoxText, 64, textBoxEditMode)) {
             return GameEvent::EVENT_MENU_START;
         }
-        char exitBoxText[64] = "Exit";
+        char exitBoxText[64] = "Exit (Q)";
         bool exitBoxEditMode = false;
-        if (GuiTextBox(Rects[1], exitBoxText, 64, exitBoxEditMode)) {
+        if (key == KEY_Q || GuiTextBox(Rects[1], exitBoxText, 64, exitBoxEditMode)) {
             return GameEvent::EVENT_MENU_EXIT;
         }
     } break;
     case ESC_SCENE: {
+        auto key = GetKeyPressed();
         char resumeBoxText[64] = "Resume (SPACE)";
         bool resumeBoxEditMode = false;
-        if (GuiTextBox(Rects[0], resumeBoxText, 64, resumeBoxEditMode)) {
+        if (key == ' ' || GuiTextBox(Rects[0], resumeBoxText, 64, resumeBoxEditMode)) {
             return GameEvent::EVENT_MENU_RESUME;
         }
         char textBoxText[64] = "Restart (R)";
         bool textBoxEditMode = false;
-        if (GuiTextBox(Rects[1], textBoxText, 64, textBoxEditMode)) {
+        if (key == KEY_R || GuiTextBox(Rects[1], textBoxText, 64, textBoxEditMode)) {
             SetGameScene(MAIN_GAME_SCENE);
             return GameEvent::EVENT_MENU_RESTART;
         }
-        char exitBoxText[64] = "Exit";
+        char exitBoxText[64] = "Exit (Q)";
         bool exitBoxEditMode = false;
-        if (GuiTextBox(Rects[2], exitBoxText, 64, exitBoxEditMode)) {
+        if (key == KEY_Q || GuiTextBox(Rects[2], exitBoxText, 64, exitBoxEditMode)) {
             return GameEvent::EVENT_MENU_EXIT;
         }
     } break;
@@ -134,12 +177,10 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
     return GameEvent::EVENT_NULL;
 }
 
-void ProcessGuiEvent(raylib::Window& window, Sokoban& game, GameEvent e) {
+void ProcessGuiEvent(GameEvent e, Sokoban& game) {
     switch (e) {
     case GameEvent::EVENT_MENU_START: {
         SetGameScene(MAIN_GAME_SCENE);
-        auto [screenWidth, screenHeight] = GameGui::GetWindowSize(game.GetState());
-        window.SetSize(screenWidth, screenHeight);
     } break;
     case GameEvent::EVENT_MENU_EXIT: {
         exit(0);
@@ -147,6 +188,9 @@ void ProcessGuiEvent(raylib::Window& window, Sokoban& game, GameEvent e) {
     case GameEvent::EVENT_MENU_RESTART: {
         SetGameScene(MAIN_GAME_SCENE);
         game.Restart();
+    } break;
+    case GameEvent::EVENT_MENU_PAUSE: {
+        SetGameScene(ESC_SCENE);
     } break;
     case GameEvent::EVENT_MENU_RESUME: {
         SetGameScene(MAIN_GAME_SCENE);

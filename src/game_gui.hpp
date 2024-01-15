@@ -11,9 +11,13 @@ enum GameScene : uint8_t { START_SCENE, MAIN_GAME_SCENE, ESC_SCENE };
 GameScene GetGameScene();
 void SetGameScene(GameScene newScene);
 void Init();
-GameEvent Draw(raylib::Window& window, const Sokoban& game);
+
+// CookInputEvent just translates kbd/mouse event into GameEvent
+std::pair<std::vector<GameEvent>, GameEvent> CookInputEvent(void);
+
 // GuiEvent here means raygui interaction, e.g., button clicked.
-void ProcessGuiEvent(raylib::Window& window, Sokoban& game, GameEvent);
+GameEvent Draw(raylib::Window& window, const Sokoban& game);
+void ProcessGuiEvent(GameEvent guiEvent, Sokoban& game);
 std::pair<int,int> GetWindowSize(const Sokoban::State& state);
 Sokoban::Pos PixelToPos(Vector2 pos);
 

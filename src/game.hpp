@@ -72,7 +72,7 @@ public:
     void LoadDefaultLevels();
     int  LoadLevelsFromTxt();
     const State& GetState() const { return state; }
-    void ProcessEvent(const std::vector<GameEvent>& events);
+    void ProcessEvent(const std::vector<GameEvent>& events, const Pos& pos);
     void Restart  (){ LoadLevel(levels[curLevel]); }
     void PushNorth(){ Push(-1, 0); }
     void PushSouth(){ Push( 1, 0); }

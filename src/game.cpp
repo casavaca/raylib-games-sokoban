@@ -195,17 +195,16 @@ bool Sokoban::Accessible(Pos s, Pos t) {
     return accessCache.count(t);
 }
 
-void Sokoban::ProcessEvent(const std::vector<GameEvent>& events) {
+void Sokoban::ProcessEvent(const std::vector<GameEvent>& events,
+                           const Sokoban::Pos& pos) {
     for (auto e:events) switch (e) {
         case GameEvent::EVENT_MOVE_UP:      { PushNorth(); } break;
         case GameEvent::EVENT_MOVE_DOWN:    { PushSouth(); } break;
-        case GameEvent::EVENT_MOVE_LEFT:    { PushEast();  } break;
-        case GameEvent::EVENT_MOVE_RIGHT:   { PushWest();  } break;
+        case GameEvent::EVENT_MOVE_LEFT:    { PushWest();  } break;
+        case GameEvent::EVENT_MOVE_RIGHT:   { PushEast();  } break;
         case GameEvent::EVENT_MOVE_RESTART: { Restart();   } break;
         case GameEvent::EVENT_MOVE_REGRET:  { Regret();    } break;
-        case GameEvent::EVENT_MOVE_CLICK: {
-        } break; // + row, col
-
+        case GameEvent::EVENT_MOVE_CLICK:   { Click(pos);  } break; // + row, col
         case GameEvent::EVENT_NULL:
         default: break;
     }
