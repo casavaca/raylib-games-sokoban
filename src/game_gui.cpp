@@ -91,16 +91,16 @@ Sokoban::Pos PixelToPos(Vector2 pos) {
     return {nrow, ncol};
 }
 
-pair<vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game) {
+pair<vector<GameEvent>, GuiEvent> CookInputEvent(const Sokoban& game) {
     static int lastKeyPressed = KEY_NULL;
     bool leftButton  = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
                        IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     bool rightButton = IsMouseButtonReleased(MOUSE_RIGHT_BUTTON);
     std::vector<GameEvent> gameEvents;
-    GameEvent guiEvent = GameEvent::EVENT_NULL;
+    GuiEvent guiEvent = GuiEvent::EVENT_NULL;
 
     if (IsKeyPressed(KEY_ESCAPE)) {
-        guiEvent = GameEvent::EVENT_MENU_PAUSE;
+        guiEvent = GuiEvent::EVENT_MENU_PAUSE;
     }
 
     if (GetGameScene() != MAIN_GAME_SCENE) {
@@ -108,7 +108,7 @@ pair<vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game) {
     }
 
     if (game.LevelCompleted()) {
-        return {{}, GameEvent::EVENT_MENU_LEVEL_FINISHED};
+        return {{}, GuiEvent::EVENT_MENU_LEVEL_FINISHED};
     }
 
     // TODO: add option for keyboard layout / AWERTY?
@@ -137,21 +137,21 @@ struct MyGuiButton {
     bool disabled;
     const char* text;
     int shortcutKey;
-    GameEvent event;
+    GuiEvent event;
 };
 
-GameEvent Draw(raylib::Window& window, const Sokoban& game) {
+GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
 
     // TODO: get rid of the magic numbers.
     Rectangle   rects[]  = {{ 45, 115, 425, 60 }, { 45, 215, 425, 60 }, { 45, 315, 425, 60 }};
     int         numRects = 0;
 
-    MyGuiButton nextLevelButton    { false, "Next Level (SPACE)" , KEY_SPACE, GameEvent::EVENT_MENU_NEXT_LEVEL };
-    MyGuiButton noMoreLevelsButton { true,  "All Level Completed", KEY_NULL,  GameEvent::EVENT_NULL            };
-    MyGuiButton startButton        { false, "Start (SPACE)"      , KEY_SPACE, GameEvent::EVENT_MENU_START      };
-    MyGuiButton resumeButton       { false, "Resume (SPACE)"     , KEY_SPACE, GameEvent::EVENT_MENU_RESUME     };
-    MyGuiButton restartButton      { false, "Restart (R)"        , KEY_R,     GameEvent::EVENT_MENU_RESTART    };
-    MyGuiButton quitButton         { false, "Quit (Q)"           , KEY_Q,     GameEvent::EVENT_MENU_EXIT       };
+    MyGuiButton nextLevelButton    { false, "Next Level (SPACE)" , KEY_SPACE, GuiEvent::EVENT_MENU_NEXT_LEVEL };
+    MyGuiButton noMoreLevelsButton { true,  "All Level Completed", KEY_NULL,  GuiEvent::EVENT_NULL            };
+    MyGuiButton startButton        { false, "Start (SPACE)"      , KEY_SPACE, GuiEvent::EVENT_MENU_START      };
+    MyGuiButton resumeButton       { false, "Resume (SPACE)"     , KEY_SPACE, GuiEvent::EVENT_MENU_RESUME     };
+    MyGuiButton restartButton      { false, "Restart (R)"        , KEY_R,     GuiEvent::EVENT_MENU_RESTART    };
+    MyGuiButton quitButton         { false, "Quit (Q)"           , KEY_Q,     GuiEvent::EVENT_MENU_EXIT       };
 
     auto CreateButton = [&rects, &numRects](const MyGuiButton& b)->bool{
         GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
@@ -165,7 +165,7 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
         }
     };
 
-    auto ret = GameEvent::EVENT_NULL;
+    auto ret = GuiEvent::EVENT_NULL;
 
     int expectedWidth  = 800;
     int expectedHeight = 600;
@@ -197,34 +197,34 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
     case MAIN_GAME_SCENE: {
         DrawGameScene(game.GetState());
     } break;
-    default: break;
+    default: UNREACHABLE(); break;
     }
     return ret;
 }
 
 // Return true if we should exit
-bool ProcessGuiEvent(GameEvent e, Sokoban& game) {
+bool ProcessGuiEvent(GuiEvent e, Sokoban& game) {
     switch (e) {
-    case GameEvent::EVENT_MENU_START: {
+    case GuiEvent::EVENT_MENU_START: {
         SetGameScene(MAIN_GAME_SCENE);
     } break;
-    case GameEvent::EVENT_MENU_EXIT: {
+    case GuiEvent::EVENT_MENU_EXIT: {
         return true;
     } break;
-    case GameEvent::EVENT_MENU_RESTART: {
+    case GuiEvent::EVENT_MENU_RESTART: {
         SetGameScene(MAIN_GAME_SCENE);
         game.Restart();
     } break;
-    case GameEvent::EVENT_MENU_PAUSE: {
+    case GuiEvent::EVENT_MENU_PAUSE: {
         if (GetGameScene() == ESC_SCENE)
             SetGameScene(MAIN_GAME_SCENE);
         else if (GetGameScene() == MAIN_GAME_SCENE)
             SetGameScene(ESC_SCENE);
     } break;
-    case GameEvent::EVENT_MENU_RESUME: {
+    case GuiEvent::EVENT_MENU_RESUME: {
         SetGameScene(MAIN_GAME_SCENE);
     } break;
-    case GameEvent::EVENT_MENU_LEVEL_FINISHED: {
+    case GuiEvent::EVENT_MENU_LEVEL_FINISHED: {
         // Ignore the event (which will be issued again) if
         // any mouse button is down.
         // This is because if we switch scene too early,
@@ -236,20 +236,15 @@ bool ProcessGuiEvent(GameEvent e, Sokoban& game) {
             break;
         SetGameScene(LEVEL_FINISHED_SCENE);
     } break;
-    case GameEvent::EVENT_MENU_NEXT_LEVEL: {
+    case GuiEvent::EVENT_MENU_NEXT_LEVEL: {
         SetGameScene(MAIN_GAME_SCENE);
 #if defined(DEBUG)
         assert(!game.IsLastLevel());
 #endif
         game.NextLevel();
     } break;
-    case GameEvent::EVENT_NULL:
+    case GuiEvent::EVENT_NULL:
         break;
-    default: {
-#if defined(DEBUG)
-        assert(false);
-#endif
-    }
     }
     return false;
 }

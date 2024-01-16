@@ -30,8 +30,6 @@
 // In this case, we can mock Gui::processInput easily.
 
 enum class GameEvent {
-    EVENT_NULL,
-
     // control
     EVENT_MOVE_UP,
     EVENT_MOVE_DOWN,
@@ -40,8 +38,11 @@ enum class GameEvent {
     EVENT_MOVE_RESTART,
     EVENT_MOVE_REGRET,
     EVENT_MOVE_CLICK, // + row, col
+};
 
+enum class GuiEvent {
     // menu
+    EVENT_NULL,
     EVENT_MENU_PAUSE,
     EVENT_MENU_RESUME,
     EVENT_MENU_RESTART,

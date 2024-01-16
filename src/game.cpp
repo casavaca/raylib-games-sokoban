@@ -20,7 +20,7 @@ static constexpr TileType TxtMap(char c) {
     case '.': return TILE_TARGET;
     case '_': return TILE_NULL;
     default:
-        assert(false);
+        UNREACHABLE();
         return TILE_NULL;
     }
 }
@@ -30,6 +30,7 @@ bool Sokoban::LoadLevel(const Level& level) {
     state = vector<vector<TileType>>(level.lines.size());
     std::transform(level.lines.begin(), level.lines.end(), state.begin(), [](const string& s)->vector<TileType>{
             // one liner in C++23 but we are just using C++17...
+            assert(s.find_first_not_of(" #$@*._") == s.npos);
             vector<TileType> ret(s.size());
             std::transform(s.begin(), s.end(), ret.begin(), TxtMap);
             return ret;
@@ -72,14 +73,13 @@ void Sokoban::LoadDefaultLevels() {
 }
 
 // operators
-Sokoban::Pos operator+(Sokoban::Pos a, Sokoban::Pos b) { return {a.row+b.row, a.col+b.col}; }
-Sokoban::Pos operator-(Sokoban::Pos a, Sokoban::Pos b) { return {a.row-b.row, a.col-b.col}; }
-Sokoban::Pos operator-(Sokoban::Pos a)                 { return {-a.row,     -a.col      }; }
+static inline Sokoban::Pos operator+ (Sokoban::Pos a, Sokoban::Pos b)     { return {a.row+b.row, a.col+b.col}; }
+static inline Sokoban::Pos operator- (Sokoban::Pos a, Sokoban::Pos b)     { return {a.row-b.row, a.col-b.col}; }
+static inline Sokoban::Pos operator- (Sokoban::Pos a)                     { return {-a.row,     -a.col      }; }
 
-TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
-TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
-TileType& operator&=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs & rhs); }
-TileType& operator&=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs & rhs); }
+static inline TileType&    operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
+static inline TileType&    operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
+static inline TileType&    operator&=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs & rhs); }
 
 // .--------> x
 // |
@@ -111,20 +111,16 @@ void Sokoban::Push(int dy, int dx) {
     Pos newPos = playerPos + dp;
     if (!InBound(newPos))
         return;
-    switch (state[newPos.row][newPos.col]) {
-    case TILE_BOX:
-    case TILE_BOX_ON_TARGET: {
+    if (state[newPos.row][newPos.col] & TILE_BOX) {
         if (!IsSpace(newPos + dp))
             return SetPlayerPos(playerPos, dy,dx);
         history.push({newPos, dp});
         MoveBox(newPos, dp);
-    } [[fallthrough]];
-    case TILE_SPACE:
-    case TILE_TARGET: {
+    }
+    if (IsSpace(newPos)) {
         ClearPlayerPos();
         SetPlayerPos(newPos, dy, dx);
-    } break;
-    default:
+    } else {
         SetPlayerPos(playerPos, dy, dx);
     }
 }
@@ -187,7 +183,7 @@ bool Sokoban::Accessible(Pos s, Pos t) {
     accessCache.insert(s);
     queue<Pos> q;
     q.push(s);
-    while(q.size()) {
+    while (q.size()) {
         auto n = q.front();
         q.pop();
         std::array<Pos,4> dps = {Pos{-1,0},{1,0},{0,-1},{0,1}};
@@ -213,8 +209,6 @@ void Sokoban::ProcessEvent(const std::vector<GameEvent>& events,
         case GameEvent::EVENT_MOVE_RESTART: { Restart();   } break;
         case GameEvent::EVENT_MOVE_REGRET:  { Regret();    } break;
         case GameEvent::EVENT_MOVE_CLICK:   { Click(pos);  } break; // + row, col
-        case GameEvent::EVENT_NULL:
-        default: break;
     }
 }
 

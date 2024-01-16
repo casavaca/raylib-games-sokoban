@@ -1,15 +1,11 @@
-#include "raylib-cpp.hpp"
 #include "raylib.h"
 #include "raygui.h"
 #include "rgestures.h"
 
 #include "game.hpp"
 #include "game_gui.hpp"
-#include "game_config.hpp"
 
 #include <CLI/CLI.hpp>
-#include <chrono>
-#include <thread>
 
 using namespace GameGui;
 using namespace std;

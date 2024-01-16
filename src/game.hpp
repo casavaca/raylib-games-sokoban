@@ -13,6 +13,14 @@
 #include <cassert>
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define UNREACHABLE() __assume(0)
+#else
+#define UNREACHABLE() throw std::runtime_error("Unreachable code reached at " __FILE__ ":" __LINE__);
+#endif
+
 // Types
 enum TileType : uint8_t {
     // [ 0 0 0 0 0 0  0 0  ]
@@ -88,7 +96,6 @@ private:
     void Pull(Pos LastPlayerPos, Pos dp);
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
-    int  GetSubtype(Pos p) const {return state[p.row][p.col] & 3; }
     void MoveBox(Pos p, Pos dp);
     bool IsBlocked(Pos p) const {return InBound(p) && (Get(p) & TILE_BLOCKED);     }
     bool IsBox    (Pos p) const {return InBound(p) && (Get(p) & TILE_BOX);         }

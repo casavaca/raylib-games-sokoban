@@ -25,11 +25,11 @@ void SetGameScene(GameScene newScene);
 void Init(GameResources* resourcePtr);
 
 // CookInputEvent just translates kbd/mouse event into GameEvent
-std::pair<std::vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game);
+std::pair<std::vector<GameEvent>, GuiEvent> CookInputEvent(const Sokoban& game);
 
 // GuiEvent here means raygui interaction, e.g., button clicked.
-GameEvent Draw(raylib::Window& window, const Sokoban& game);
-bool ProcessGuiEvent(GameEvent guiEvent, Sokoban& game);
+GuiEvent Draw(raylib::Window& window, const Sokoban& game);
+bool ProcessGuiEvent(GuiEvent guiEvent, Sokoban& game);
 std::pair<int,int> GetWindowSize(const Sokoban::State& state);
 Sokoban::Pos PixelToPos(Vector2 pos);
 

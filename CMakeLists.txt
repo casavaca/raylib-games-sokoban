@@ -98,7 +98,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE    $<$<CONFIG:Debug>:-DDEBUG>)
 target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp CLI11::CLI11)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-pedantic -Wimplicit-fallthrough -Wall -Wextra -Wno-unused-function -Wno-sign-compare -Werror>)
+  target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-pedantic -Wimplicit-fallthrough -Wswitch-enum -Wall -Wextra -Wno-unused-function -Wno-sign-compare -Werror>)
 endif()
 
 if (WIN32)
