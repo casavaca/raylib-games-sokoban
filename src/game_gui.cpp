@@ -216,12 +216,24 @@ bool ProcessGuiEvent(GameEvent e, Sokoban& game) {
         game.Restart();
     } break;
     case GameEvent::EVENT_MENU_PAUSE: {
-        SetGameScene(ESC_SCENE);
+        if (GetGameScene() == ESC_SCENE)
+            SetGameScene(MAIN_GAME_SCENE);
+        else if (GetGameScene() == MAIN_GAME_SCENE)
+            SetGameScene(ESC_SCENE);
     } break;
     case GameEvent::EVENT_MENU_RESUME: {
         SetGameScene(MAIN_GAME_SCENE);
     } break;
     case GameEvent::EVENT_MENU_LEVEL_FINISHED: {
+        // Ignore the event (which will be issued again) if
+        // any mouse button is down.
+        // This is because if we switch scene too early,
+        // the mouse-up will be detected as button click,
+        // which mayn result the user clicking some button without
+        // their intention.
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ||
+            IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+            break;
         SetGameScene(LEVEL_FINISHED_SCENE);
     } break;
     case GameEvent::EVENT_MENU_NEXT_LEVEL: {

@@ -67,8 +67,6 @@ int main(int argc, char** argv) {
         Sokoban::Pos pos = GameGui::PixelToPos(GetMousePosition());
         auto [gameEvents, guiEvent] = GameGui::CookInputEvent(game);
         game.ProcessEvent(gameEvents, pos);
-        if (GameGui::ProcessGuiEvent(guiEvent, game))
-            shouldClose = true;
 
         //----------------------------------------------------------------------------------
         // Draw
@@ -76,11 +74,10 @@ int main(int argc, char** argv) {
         BeginDrawing();
         window.ClearBackground(LIGHTGRAY);
         auto event = GameGui::Draw(window, game);
-        if (GameGui::ProcessGuiEvent(event, game))
-            shouldClose = true;
-
         EndDrawing();
 
+        shouldClose |= GameGui::ProcessGuiEvent(guiEvent, game);
+        shouldClose |= GameGui::ProcessGuiEvent(event,    game);
         shouldClose |= window.ShouldClose(); // window close button
 
         //----------------------------------------------------------------------------------
@@ -104,6 +101,11 @@ int main(int argc, char** argv) {
     }
 
     // raylib event record and replay.
+#if defined(DEBUG)
+    if (app.count("--replay")) {
+        assert(raylibEventList.count == 0);
+    }
+#endif
     if (app.count("--record")) {
         StopAutomationEventRecording();
         ExportAutomationEventList(raylibEventList, raylibEventFile.c_str());
