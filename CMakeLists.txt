@@ -174,7 +174,14 @@ add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
 # test
 ################################################################################
 
-# enable testing functionality
 enable_testing()
 add_test(NAME smoketest COMMAND xvfb-run -s "+extension GLX" ${BIN_DIR}/${PROJECT_NAME} --fps 0 --replay ${CMAKE_CURRENT_LIST_DIR}/test/test.events)
 set_tests_properties(smoketest PROPERTIES TIMEOUT 30)
+
+################################################################################
+# coverage using llvm-cov
+################################################################################
+
+# Include the custom build type configuration file
+set(CMAKE_CXX_FLAGS_COVERAGE "-fprofile-instr-generate -fcoverage-mapping -g -O0")
+set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "--coverage")
