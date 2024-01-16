@@ -197,7 +197,7 @@ GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
     case MAIN_GAME_SCENE: {
         DrawGameScene(game.GetState());
     } break;
-    default: UNREACHABLE(); break;
+    default: Unreachable(); break;
     }
     return ret;
 }

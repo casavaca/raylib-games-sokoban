@@ -20,8 +20,7 @@ static constexpr TileType TxtMap(char c) {
     case '.': return TILE_TARGET;
     case '_': return TILE_NULL;
     default:
-        UNREACHABLE();
-        return TILE_NULL;
+        Unreachable();
     }
 }
 

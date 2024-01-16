@@ -13,13 +13,15 @@
 #include <cassert>
 #endif
 
+[[noreturn]] inline void Unreachable() {
 #if defined(__GNUC__) || defined(__clang__)
-#define UNREACHABLE() __builtin_unreachable()
+    __builtin_unreachable();
 #elif defined(_MSC_VER)
-#define UNREACHABLE() __assume(0)
+    __assume(false);
 #else
-#define UNREACHABLE() throw std::runtime_error("Unreachable code reached at " __FILE__ ":" __LINE__);
+#error unreachable not implemented
 #endif
+}
 
 // Types
 enum TileType : uint8_t {
