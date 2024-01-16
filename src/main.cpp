@@ -18,11 +18,12 @@ int main(int argc, char** argv) {
 
     CLI::App app{"Sokoban"};
     string raylibEventFile;
-    auto* option_record      = app.add_option("--record", raylibEventFile, "record input event");
-    auto* option_replay      = app.add_option("--replay", raylibEventFile, "replay events from file")
-                                       ->excludes(option_record);
-    [[maybe_unused]] auto* _ = app.add_flag  ("--fast"  , "replay but faster")
-                                       ->needs(option_replay);
+    int FPS = 60;
+    auto* option_record       = app.add_option("--record", raylibEventFile, "record input event");
+    [[maybe_unused]] auto* _1 = app.add_option("--replay", raylibEventFile, "replay events from file")
+                                        ->excludes(option_record);
+    [[maybe_unused]] auto* _2 = app.add_option("--fps",    FPS, "Set FPS (intended for testing only)")
+                                        ->default_val(60);
 
     CLI11_PARSE(app, argc, argv);
 
@@ -37,7 +38,7 @@ int main(int argc, char** argv) {
     game.LoadDefaultLevels();
 
     GameGui::Init(&gameResources);
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    SetTargetFPS(FPS);              // Set FPS
     SetExitKey(KEY_NULL);           // Disable quit-on-ESC
     //---------------------------------------------------------------------------------------
 
@@ -54,8 +55,6 @@ int main(int argc, char** argv) {
         StartAutomationEventRecording();
     } else if (app.count("--replay")) {
         raylibEventList = LoadAutomationEventList(raylibEventFile.c_str());
-        if (app.count("--fast"))
-            SetTargetFPS(0); // unlimited FPS
     }
 
     // Main game loop
