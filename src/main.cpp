@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     auto* option_record      = app.add_option("--record", raylibEventFile, "record input event");
     auto* option_replay      = app.add_option("--replay", raylibEventFile, "replay events from file")
                                        ->excludes(option_record);
-    [[maybe_unused]] auto* _ = app.add_flag  ("--fast"  , "replay but skip idle frames")
+    [[maybe_unused]] auto* _ = app.add_flag  ("--fast"  , "replay but faster")
                                        ->needs(option_replay);
 
     CLI11_PARSE(app, argc, argv);
@@ -54,6 +54,8 @@ int main(int argc, char** argv) {
         StartAutomationEventRecording();
     } else if (app.count("--replay")) {
         raylibEventList = LoadAutomationEventList(raylibEventFile.c_str());
+        if (app.count("--fast"))
+            SetTargetFPS(0); // unlimited FPS
     }
 
     // Main game loop
@@ -88,7 +90,6 @@ int main(int argc, char** argv) {
             static int current_frame = 0;
             if (raylibEventList.count == 0)
                 break;
-
             while (raylibEventList.count) {
                 if (raylibEventList.events->frame == current_frame) {
                     PlayAutomationEvent(*raylibEventList.events);
@@ -98,10 +99,7 @@ int main(int argc, char** argv) {
                     break;
                 }
             }
-            if (app.count("--fast") && raylibEventList.count)
-                current_frame = raylibEventList.events->frame;
-            else
-                current_frame++;
+            current_frame++;
         }
     }
 
