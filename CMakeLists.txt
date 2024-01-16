@@ -14,12 +14,13 @@ endif()
 # Dependencies
 ################################################################################
 
+include(FetchContent)
+
 ################################################################################
 # raylib
 ################################################################################
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
-    include(FetchContent)
     FetchContent_Declare(
         raylib
 
@@ -45,7 +46,6 @@ endif()
 ################################################################################
 find_package(raygui QUIET)
 if (NOT raygui_FOUND)
-    include(FetchContent)
     FetchContent_Declare(
         raygui
         URL https://github.com/raysan5/raygui/archive/refs/tags/4.0.tar.gz
@@ -60,7 +60,6 @@ endif()
 ################################################################################
 find_package(raylib_cpp QUIET)
 if (NOT raylib_cpp_FOUND)
-    include(FetchContent)
     FetchContent_Declare(
         raylib_cpp
         URL      https://github.com/RobLoach/raylib-cpp/archive/refs/tags/v5.0.0.tar.gz
@@ -68,6 +67,17 @@ if (NOT raylib_cpp_FOUND)
     )
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
+
+################################################################################
+# CLI11
+################################################################################
+FetchContent_Declare(
+    cli11_proj
+    QUIET
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG v2.3.2
+)
+FetchContent_MakeAvailable(cli11_proj)
 
 ################################################################################
 # End Dependencies
@@ -81,7 +91,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 set_target_properties (${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PRIVATE    $<$<CONFIG:Debug>:-DDEBUG>)
-target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp)
+target_link_libraries (${PROJECT_NAME} PRIVATE    raylib raylib_cpp CLI11::CLI11)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-pedantic -Wimplicit-fallthrough -Wall -Wextra -Wno-unused-function -Wno-sign-compare -Werror>)

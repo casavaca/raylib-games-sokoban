@@ -22,7 +22,7 @@ std::pair<std::vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game)
 
 // GuiEvent here means raygui interaction, e.g., button clicked.
 GameEvent Draw(raylib::Window& window, const Sokoban& game);
-void ProcessGuiEvent(GameEvent guiEvent, Sokoban& game);
+bool ProcessGuiEvent(GameEvent guiEvent, Sokoban& game);
 std::pair<int,int> GetWindowSize(const Sokoban::State& state);
 Sokoban::Pos PixelToPos(Vector2 pos);
 

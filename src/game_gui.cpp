@@ -198,13 +198,14 @@ GameEvent Draw(raylib::Window& window, const Sokoban& game) {
     return ret;
 }
 
-void ProcessGuiEvent(GameEvent e, Sokoban& game) {
+// Return true if we should exit
+bool ProcessGuiEvent(GameEvent e, Sokoban& game) {
     switch (e) {
     case GameEvent::EVENT_MENU_START: {
         SetGameScene(MAIN_GAME_SCENE);
     } break;
     case GameEvent::EVENT_MENU_EXIT: {
-        exit(0);
+        return true;
     } break;
     case GameEvent::EVENT_MENU_RESTART: {
         SetGameScene(MAIN_GAME_SCENE);
@@ -234,6 +235,7 @@ void ProcessGuiEvent(GameEvent e, Sokoban& game) {
 #endif
     }
     }
+    return false;
 }
 
 }
