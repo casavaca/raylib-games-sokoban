@@ -135,6 +135,6 @@ jobs:
         compression-level: 6
 
     - name: Test
-      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == gcc }}
+      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'gcc' }}
       working-directory: ${{ github.workspace }}
       run: ctest --build-config ${{ matrix.build_type }} --test-dir ${{ steps.strings.outputs.build-output-dir }}
