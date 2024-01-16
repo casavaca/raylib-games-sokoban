@@ -4,6 +4,9 @@
 #include "raylib.h"
 #include "raylib-cpp.hpp"
 
+#include <unordered_map>
+#include <cstdint>
+
 namespace GameGui {
 
 enum GameScene : uint8_t {
@@ -13,9 +16,13 @@ enum GameScene : uint8_t {
     LEVEL_FINISHED_SCENE,
 };
 
+struct GameResources {
+    std::unordered_map<uint8_t, raylib::Texture> textures;
+};
+
 GameScene GetGameScene();
 void SetGameScene(GameScene newScene);
-void Init();
+void Init(GameResources* resourcePtr);
 
 // CookInputEvent just translates kbd/mouse event into GameEvent
 std::pair<std::vector<GameEvent>, GameEvent> CookInputEvent(const Sokoban& game);

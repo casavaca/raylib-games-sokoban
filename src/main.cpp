@@ -32,10 +32,11 @@ int main(int argc, char** argv) {
 
     GuiLoadStyle("assets/styles/cyber/cyber.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
-    Sokoban game;
+    Sokoban       game;
+    GameResources gameResources;
     game.LoadDefaultLevels();
 
-    GameGui::Init();
+    GameGui::Init(&gameResources);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     SetExitKey(KEY_NULL);           // Disable quit-on-ESC
     //---------------------------------------------------------------------------------------

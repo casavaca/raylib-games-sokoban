@@ -4,12 +4,9 @@
 #include "raygui.h"
 #include "raylib.h"
 
-#include <unordered_map>
-#include <cstdint>
-
 using namespace std;
 
-unordered_map<uint8_t, raylib::Texture> g_basePng;
+unordered_map<uint8_t, raylib::Texture>*              g_textures;
 unordered_map<uint8_t, std::vector<raylib::Texture*>> g_pngs;
 
 namespace GameGui {
@@ -23,7 +20,12 @@ void SetGameScene(GameScene newScene){
     scene = newScene;
 }
 
-void Init() {
+void Init(GameResources* resourcePtr) {
+    // g_basePng used to be a global static variable.
+    // But I've see segfault in glDeleteTextures if it is destructed too late.
+    // So, let's just keep a reference in main, so it's destructed timely.
+    g_textures = &resourcePtr->textures;
+    auto& g_basePng = *g_textures;
 #if defined(PLATFORM_WEB)
     std::string prefix = "assets/kenney_sokoban-pack/PNG/Default size";
 #else
@@ -58,6 +60,7 @@ void Init() {
 }
 
 static void DrawGameScene(const Sokoban::State& state) {
+    auto& g_basePng = *g_textures;
     const int blockPixels = g_basePng[TILE_NULL].GetWidth();
     for (int i=0; i<state.size(); i++) {
         for (int j=0; j<state[i].size(); j++) {
@@ -70,6 +73,7 @@ static void DrawGameScene(const Sokoban::State& state) {
 }
 
 static int GetBlockPixels() {
+    auto& g_basePng = *g_textures;
 #if defined(DEBUG)
     assert(g_basePng.at(TILE_NULL).GetWidth() == g_basePng.at(TILE_NULL).GetHeight());
 #endif
