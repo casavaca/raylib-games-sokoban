@@ -67,10 +67,12 @@ jobs:
     - name: Setup Environment
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo apt-get update -qq
-        sudo apt-get install -y --no-install-recommends libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
+        sudo apt update -qq
+        sudo apt install -y --no-install-recommends libglfw3 libglfw3-dev libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev
         # install xvfb for testing
-        sudo apt-get install -y xvfb
+        sudo apt install -y xvfb
+        # install llvm for coverage
+        sudo apt install -y llvm-15
 
     - name: early check if required binaries are present
       if: ${{ matrix.os == 'ubuntu-latest' }}
