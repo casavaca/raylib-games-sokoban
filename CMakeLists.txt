@@ -184,4 +184,3 @@ set_tests_properties(smoketest PROPERTIES TIMEOUT 30)
 
 # Include the custom build type configuration file
 set(CMAKE_CXX_FLAGS_COVERAGE "-fprofile-instr-generate -fcoverage-mapping -g -O0")
-set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "--coverage")
