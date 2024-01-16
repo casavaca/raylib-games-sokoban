@@ -157,6 +157,7 @@ jobs:
         llvm-cov show ${{ steps.strings.outputs.build-output-dir }}/sokoban -instr-profile=/tmp/coverage.profdata ${{ github.workspace }}/src > /tmp/coverage.txt
 
     - name: Upload Coverage
+      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'clang' }}
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
