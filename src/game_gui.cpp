@@ -232,7 +232,7 @@ bool ProcessGuiEvent(GameEvent e, Sokoban& game) {
         // which mayn result the user clicking some button without
         // their intention.
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ||
-            IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+            IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
             break;
         SetGameScene(LEVEL_FINISHED_SCENE);
     } break;
