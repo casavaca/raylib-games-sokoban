@@ -83,6 +83,10 @@ FetchContent_MakeAvailable(cli11_proj)
 # End Dependencies
 ################################################################################
 
+################################################################################
+# main target
+################################################################################
+
 # find all source files.
 file(GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 
@@ -119,6 +123,10 @@ if (${PLATFORM} STREQUAL "Web")
     target_link_options(${PROJECT_NAME} PRIVATE --shell-file ${PROJECT_SOURCE_DIR}/src/template.html)
     target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
 endif()
+
+################################################################################
+# copy assets
+################################################################################
 
 # copy assets and "${raygui_SOURCE_DIR}/styles" into BIN_DIR/assets.
 #
@@ -161,3 +169,18 @@ add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/assets" ${BIN_DIR}/assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${raygui_SOURCE_DIR}/styles"      ${BIN_DIR}/assets/styles
 )
+
+################################################################################
+# test
+################################################################################
+
+enable_testing()
+add_test(NAME smoketest COMMAND xvfb-run -s "+extension GLX" ${BIN_DIR}/${PROJECT_NAME} --fps 0 --replay ${CMAKE_CURRENT_LIST_DIR}/test/test.events)
+set_tests_properties(smoketest PROPERTIES TIMEOUT 30)
+
+################################################################################
+# coverage using llvm-cov
+################################################################################
+
+# Include the custom build type configuration file
+set(CMAKE_CXX_FLAGS_COVERAGE "-fprofile-instr-generate -fcoverage-mapping -g -O0")
