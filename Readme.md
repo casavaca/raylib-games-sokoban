@@ -4,6 +4,8 @@
 
 # How to build:
 
+see [github workflow file](https://github.com/casavaca/raylib-games-sokoban/blob/master/.github/workflows/cmake-multi-platform.yml) for dependencies.
+
 + Debug build:   `cmake -S . -B build -DCMAKE_BUILD_TYPE=DEBUG           && cmake --build build`
 + Release build: `cmake -S . -B release-build -DCMAKE_BUILD_TYPE=RELEASE && cmake --build release-build`
 + WASM build:    `emcmake cmake -S . -B emscripten-build -DPLATFORM=Web  && cmake --build emscripten-build`
