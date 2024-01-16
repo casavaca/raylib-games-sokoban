@@ -1,3 +1,7 @@
+[![Actions Status](https://github.com/casavaca/raylib-games-sokoban/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/casavaca/raylib-games-sokoban/actions/workflows/cmake-multi-platform.yml)
+[![Actions Status](https://github.com/casavaca/raylib-games-sokoban/actions/workflows/cmake-emscripten.yml/badge.svg)](https://github.com/casavaca/raylib-games-sokoban/actions/workflows/cmake-emscripten.yml)
+[![codecov](https://codecov.io/gh/casavaca/raylib-games-sokoban/graph/badge.svg)](https://codecov.io/gh/casavaca/raylib-games-sokoban)
+
 # Working in progress
 
 [live preview](https://casavaca.github.io/raylib-games-sokoban/sokoban.html)
@@ -29,4 +33,4 @@ except that
 + Load levels from txt file
 + select levels
 + config gui
-+ testing (raylib `RecordAutomationEvent` and `PlayAutomationEvent`)
++ more testing and coverage
