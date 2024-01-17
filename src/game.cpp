@@ -17,6 +17,7 @@ static constexpr TileType TxtMap(char c) {
     case '@': return TILE_PLAYER;
     case '*': return TILE_BOX_ON_TARGET;
     case '.': return TILE_TARGET;
+    case '+': return TILE_PLAYER_ON_TARGET;
     default:
         assert(c == '_');
         return TILE_NULL;
@@ -28,7 +29,7 @@ bool Sokoban::LoadLevel(const Level& level) {
     state = vector<vector<TileType>>(level.lines.size());
     std::transform(level.lines.begin(), level.lines.end(), state.begin(), [](const string& s)->vector<TileType>{
             // one liner in C++23 but we are just using C++17...
-            assert(s.find_first_not_of(" #$@*._") == s.npos);
+            assert(s.find_first_not_of(ALLOWED_CHARACTERS) == s.npos);
             vector<TileType> ret(s.size());
             std::transform(s.begin(), s.end(), ret.begin(), TxtMap);
             return ret;
@@ -36,7 +37,7 @@ bool Sokoban::LoadLevel(const Level& level) {
     for (int i=0; i<state.size(); i++) {
         for (int j=0; j<state[i].size(); j++) {
             if (state[i][j] & TILE_PLAYER) {
-                playerPos = Pos{j, i};
+                playerPos = Pos{i, j};
             }
             if (state[i][j] & TILE_BOX) {
                 numBoxes++;
@@ -70,14 +71,9 @@ void Sokoban::LoadDefaultLevels() {
     LoadLevel(levels[curLevel]);
 }
 
-// operators
-static inline Sokoban::Pos operator+ (Sokoban::Pos a, Sokoban::Pos b)     { return {a.row+b.row, a.col+b.col}; }
-static inline Sokoban::Pos operator- (Sokoban::Pos a, Sokoban::Pos b)     { return {a.row-b.row, a.col-b.col}; }
-static inline Sokoban::Pos operator- (Sokoban::Pos a)                     { return {-a.row,     -a.col      }; }
-
-static inline TileType&    operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
-static inline TileType&    operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
-static inline TileType&    operator&=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs & rhs); }
+static inline TileType& operator|=(TileType& lhs, const TileType& rhs) { return lhs = static_cast<TileType>(lhs | rhs); }
+static inline TileType& operator|=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs | rhs); }
+static inline TileType& operator&=(TileType& lhs, int rhs)             { return lhs = static_cast<TileType>(lhs & rhs); }
 
 // .--------> x
 // |
