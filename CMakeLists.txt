@@ -183,4 +183,5 @@ set_tests_properties(smoketest PROPERTIES TIMEOUT 30)
 ################################################################################
 
 # Include the custom build type configuration file
-set(CMAKE_CXX_FLAGS_COVERAGE "-fprofile-instr-generate -fcoverage-mapping -g -O0")
+# add -DNDEBUG because the coverage tool is still not accurate around assert, even at -O0
+set(CMAKE_CXX_FLAGS_COVERAGE "-fprofile-instr-generate -fcoverage-mapping -g -O0 -DNDEBUG")
