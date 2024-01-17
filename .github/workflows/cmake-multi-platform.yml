@@ -25,7 +25,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Debug, Coverage, Release]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [gcc, clang-15, cl]
         include:
           - os: windows-latest
             c_compiler: cl
@@ -34,8 +34,8 @@ jobs:
             c_compiler: gcc
             cpp_compiler: g++
           - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: clang-15
+            cpp_compiler: clang++-15
         exclude:
           - os: windows-latest
             build_type: Debug
@@ -44,14 +44,14 @@ jobs:
           - os: windows-latest
             c_compiler: gcc
           - os: windows-latest
-            c_compiler: clang
+            c_compiler: clang-15
           - os: ubuntu-latest
             c_compiler: cl
           - os: ubuntu-latest
             build_type: Release
           - c_compiler: gcc
             build_type: Coverage
-          - c_compiler: clang
+          - c_compiler: clang-15
             build_type: Debug
 
     steps:
@@ -77,7 +77,7 @@ jobs:
     - name: early check if required binaries are present
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        which g++ clang++ llvm-cov-15 llvm-profdata-15 xvfb-run
+        which g++ clang++-15 llvm-cov-15 llvm-profdata-15 xvfb-run
         llvm-cov-15 --version
 
 # It's nice to have cache, but it seems that it doesn't support updating yet.
@@ -149,7 +149,7 @@ jobs:
         compression-level: 6
 
     - name: Coverage
-      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'clang' }}
+      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'clang-15' }}
       working-directory: ${{ github.workspace }}
       run: |
         export LLVM_PROFILE_FILE=/tmp/llvm_profile/profile-%p.profraw
@@ -158,7 +158,7 @@ jobs:
         llvm-cov-15 show ${{ steps.strings.outputs.build-output-dir }}/sokoban -instr-profile=/tmp/coverage.profdata ${{ github.workspace }}/src > /tmp/coverage.txt
 
     - name: Upload Coverage
-      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'clang' }}
+      if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'clang-15' }}
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
