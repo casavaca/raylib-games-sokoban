@@ -72,12 +72,13 @@ jobs:
         # install xvfb for testing
         sudo apt-get install -y xvfb
         # install llvm for coverage
-        sudo apt-get install -y llvm
+        sudo apt-get install -y llvm-15
 
     - name: early check if required binaries are present
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        which g++ clang++ llvm-cov llvm-profdata xvfb-run
+        which g++ clang++ llvm-cov-15 llvm-profdata-15 xvfb-run
+        llvm-cov-15 --version
 
 # It's nice to have cache, but it seems that it doesn't support updating yet.
 # we could do "save cache" "build" "delete cache and re-upload cache"
@@ -153,8 +154,8 @@ jobs:
       run: |
         export LLVM_PROFILE_FILE=/tmp/llvm_profile/profile-%p.profraw
         ctest --build-config ${{ matrix.build_type }} --test-dir ${{ steps.strings.outputs.build-output-dir }}
-        llvm-profdata merge -sparse /tmp/llvm_profile/profile-*.profraw -o /tmp/coverage.profdata
-        llvm-cov show ${{ steps.strings.outputs.build-output-dir }}/sokoban -instr-profile=/tmp/coverage.profdata ${{ github.workspace }}/src > /tmp/coverage.txt
+        llvm-profdata-15 merge -sparse /tmp/llvm_profile/profile-*.profraw -o /tmp/coverage.profdata
+        llvm-cov-15 show ${{ steps.strings.outputs.build-output-dir }}/sokoban -instr-profile=/tmp/coverage.profdata ${{ github.workspace }}/src > /tmp/coverage.txt
 
     - name: Upload Coverage
       if: ${{ matrix.os == 'ubuntu-latest' && matrix.c_compiler == 'clang' }}
