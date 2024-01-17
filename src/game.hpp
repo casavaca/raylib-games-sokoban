@@ -8,16 +8,6 @@
 
 #include "game_event.hpp"
 
-[[noreturn]] static inline void Unreachable() {
-#if defined(__GNUC__) || defined(__clang__)
-    __builtin_unreachable();
-#elif defined(_MSC_VER)
-    __assume(false);
-#else
-#error unreachable not implemented
-#endif
-}
-
 // Types
 enum TileType : uint8_t {
     // [ 0 0 0 0 0 0  0 0  ]

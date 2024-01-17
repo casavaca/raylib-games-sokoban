@@ -197,19 +197,20 @@ GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
     case MAIN_GAME_SCENE: {
         DrawGameScene(game.GetState());
     } break;
-    default: Unreachable(); break;
+    // It's OK to omit default because -Wswitch-enum is enabled
     }
     return ret;
 }
 
 // Return true if we should exit
 bool ProcessGuiEvent(GuiEvent e, Sokoban& game) {
+    bool shouldExit = false;
     switch (e) {
     case GuiEvent::EVENT_MENU_START: {
         SetGameScene(MAIN_GAME_SCENE);
     } break;
     case GuiEvent::EVENT_MENU_EXIT: {
-        return true;
+        shouldExit = true;
     } break;
     case GuiEvent::EVENT_MENU_RESTART: {
         SetGameScene(MAIN_GAME_SCENE);
@@ -244,7 +245,7 @@ bool ProcessGuiEvent(GuiEvent e, Sokoban& game) {
     case GuiEvent::EVENT_NULL:
         break;
     }
-    return false;
+    return shouldExit;
 }
 
 }

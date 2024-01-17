@@ -17,9 +17,9 @@ static constexpr TileType TxtMap(char c) {
     case '@': return TILE_PLAYER;
     case '*': return TILE_BOX_ON_TARGET;
     case '.': return TILE_TARGET;
-    case '_': return TILE_NULL;
     default:
-        Unreachable();
+        assert(c == '_');
+        return TILE_NULL;
     }
 }
 
