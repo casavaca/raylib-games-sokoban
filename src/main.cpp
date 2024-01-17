@@ -44,8 +44,16 @@ int main(int argc, char** argv) {
 
 #if defined(DEBUG) || defined(COVERAGE)
     // raylib event record and replay, testing only.
+    // To get better coverage,
+    // --record is only enabled on DEBUG, while
+    // --replay is enabled on both DEBUG and COVERAGE
     vector<AutomationEvent> raylibEvents;
     AutomationEventList     raylibEventList;
+    if (app.count("--replay")) {
+        raylibEventList = LoadAutomationEventList(raylibEventFile.c_str());
+    }
+#endif
+#if defined(DEBUG)
     if (app.count("--record")) {
         raylibEvents.resize(16384);
         raylibEventList.events   = raylibEvents.data();
@@ -54,9 +62,6 @@ int main(int argc, char** argv) {
 
         SetAutomationEventList(&raylibEventList);
         StartAutomationEventRecording();
-    }
-    if (app.count("--replay")) {
-        raylibEventList = LoadAutomationEventList(raylibEventFile.c_str());
     }
 #endif
 
