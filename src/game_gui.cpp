@@ -4,6 +4,8 @@
 #include "raygui.h"
 #include "raylib.h"
 
+#include <cassert>
+
 using namespace std;
 
 unordered_map<uint8_t, raylib::Texture>*              g_textures;
@@ -74,9 +76,7 @@ static void DrawGameScene(const Sokoban::State& state) {
 
 static int GetBlockPixels() {
     auto& g_basePng = *g_textures;
-#if defined(DEBUG)
     assert(g_basePng.at(TILE_NULL).GetWidth() == g_basePng.at(TILE_NULL).GetHeight());
-#endif
     return g_basePng.at(TILE_NULL).GetWidth();
 }
 
@@ -238,9 +238,7 @@ bool ProcessGuiEvent(GuiEvent e, Sokoban& game) {
     } break;
     case GuiEvent::EVENT_MENU_NEXT_LEVEL: {
         SetGameScene(MAIN_GAME_SCENE);
-#if defined(DEBUG)
         assert(!game.IsLastLevel());
-#endif
         game.NextLevel();
     } break;
     case GuiEvent::EVENT_NULL:

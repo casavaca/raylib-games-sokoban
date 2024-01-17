@@ -7,6 +7,8 @@
 
 #include <CLI/CLI.hpp>
 
+#include <cassert>
+
 using namespace GameGui;
 using namespace std;
 
@@ -96,11 +98,9 @@ int main(int argc, char** argv) {
     }
 
     // raylib event record and replay.
-#if defined(DEBUG)
     if (app.count("--replay")) {
         assert(raylibEventList.count == 0);
     }
-#endif
     if (app.count("--record")) {
         StopAutomationEventRecording();
         ExportAutomationEventList(raylibEventList, raylibEventFile.c_str());

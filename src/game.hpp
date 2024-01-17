@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <stack>
 #include <unordered_set>
 #include <vector>
@@ -9,11 +8,7 @@
 
 #include "game_event.hpp"
 
-#if defined(DEBUG)
-#include <cassert>
-#endif
-
-[[noreturn]] inline void Unreachable() {
+[[noreturn]] static inline void Unreachable() {
 #if defined(__GNUC__) || defined(__clang__)
     __builtin_unreachable();
 #elif defined(_MSC_VER)

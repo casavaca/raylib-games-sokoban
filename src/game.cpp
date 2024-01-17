@@ -1,9 +1,8 @@
 #include "game.hpp"
 
 #include <algorithm>
-#include <functional>
+#include <array>
 #include <queue>
-#include <sstream>
 
 #include <cassert>
 
@@ -90,17 +89,13 @@ static inline TileType&    operator&=(TileType& lhs, int rhs)             { retu
 // unconditionally move box at p to p+dp.
 void Sokoban::MoveBox(Pos p, Pos dp) {
     Pos newPos = p + dp;
-#if defined(DEBUG)
     assert(Get(p) & TILE_BOX);
     assert(IsSpace(newPos));
-#endif
     Get(newPos) |= TILE_BOX;
     Get(p)      &= ~TILE_BOX;
     if ((Get(p) & TILE_TARGET) != (Get(newPos) & TILE_TARGET)) {
         numBoxesOnTarget += (Get(newPos) & TILE_TARGET) ? 1 : -1;
-#if defined(DEBUG)
         assert(numBoxesOnTarget >= 0);
-#endif
     }
     accessCache.clear();
 }
@@ -127,10 +122,8 @@ void Sokoban::Push(int dy, int dx) {
 void Sokoban::Pull(Pos lastPlayerPos, Pos dp) {
     Pos newPos = lastPlayerPos + dp;
     Pos boxPos = lastPlayerPos - dp;
-#if defined(DEBUG)
     assert(InBound(newPos) && IsSpace(newPos));
     assert(InBound(boxPos) && IsBox(boxPos));
-#endif
     ClearPlayerPos();
     SetPlayerPos(newPos, -dp.row, -dp.col);
     MoveBox(boxPos, dp);
@@ -145,9 +138,7 @@ void Sokoban::Regret() {
 }
 
 void Sokoban::SetPlayerPos(Pos p, int dy, int dx) {
-#if defined(DEBUG)
     assert(InBound(p));
-#endif
     playerPos = p;
     Get(playerPos) |= TILE_PLAYER;
     Get(playerPos) &= ~3;
