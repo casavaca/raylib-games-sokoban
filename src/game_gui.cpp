@@ -161,7 +161,7 @@ GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
             GuiSetState(STATE_NORMAL);
             return false;
         } else {
-            return (IsKeyPressed(b.shortcutKey) || GuiButton(rects[numRects++], b.text));
+            return (GuiButton(rects[numRects++], b.text) || IsKeyPressed(b.shortcutKey));
         }
     };
 

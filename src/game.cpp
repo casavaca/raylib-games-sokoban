@@ -103,8 +103,7 @@ void Sokoban::MoveBox(Pos p, Pos dp) {
 void Sokoban::Push(int dy, int dx) {
     Pos dp = {dy, dx};
     Pos newPos = playerPos + dp;
-    if (!InBound(newPos))
-        return;
+    assert(InBound(newPos));
     if (state[newPos.row][newPos.col] & TILE_BOX) {
         if (!IsSpace(newPos + dp))
             return SetPlayerPos(playerPos, dy,dx);
