@@ -17,9 +17,11 @@ int main(int argc, char** argv) {
     CLI::App app{"Sokoban"};
     string raylibEventFile;
     int FPS = 60;
+#if defined(DEBUG) || defined(COVERAGE)
     auto* option_record       = app.add_option("--record", raylibEventFile, "record input event");
     [[maybe_unused]] auto* _1 = app.add_option("--replay", raylibEventFile, "replay events from file")
                                         ->excludes(option_record);
+#endif
     [[maybe_unused]] auto* _2 = app.add_option("--fps",    FPS, "Set FPS (intended for testing only)")
                                         ->default_val(60);
 
@@ -40,7 +42,8 @@ int main(int argc, char** argv) {
     SetExitKey(KEY_NULL);           // Disable quit-on-ESC
     //---------------------------------------------------------------------------------------
 
-    // raylib event record and replay.
+#if defined(DEBUG) || defined(COVERAGE)
+    // raylib event record and replay, testing only.
     vector<AutomationEvent> raylibEvents;
     AutomationEventList     raylibEventList;
     if (app.count("--record")) {
@@ -51,9 +54,11 @@ int main(int argc, char** argv) {
 
         SetAutomationEventList(&raylibEventList);
         StartAutomationEventRecording();
-    } else if (app.count("--replay")) {
+    }
+    if (app.count("--replay")) {
         raylibEventList = LoadAutomationEventList(raylibEventFile.c_str());
     }
+#endif
 
     // Main game loop
     bool shouldClose = false;
@@ -80,6 +85,7 @@ int main(int argc, char** argv) {
         //----------------------------------------------------------------------------------
         // Replay input events
         //----------------------------------------------------------------------------------
+#if defined(DEBUG) || defined(COVERAGE)
         if (app.count("--replay")) {
             static int current_frame = 0;
             if (raylibEventList.count == 0)
@@ -95,16 +101,20 @@ int main(int argc, char** argv) {
             }
             current_frame++;
         }
+#endif
     }
 
     // raylib event record and replay.
+#if defined(DEBUG) || defined(COVERAGE)
     if (app.count("--replay")) {
         assert(raylibEventList.count == 0);
     }
+#endif
+#if defined(DEBUG)
     if (app.count("--record")) {
         StopAutomationEventRecording();
         ExportAutomationEventList(raylibEventList, raylibEventFile.c_str());
     }
-
+#endif
     return 0;
 }
