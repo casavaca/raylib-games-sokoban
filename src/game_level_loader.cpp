@@ -108,6 +108,29 @@ static std::optional<Sokoban::Level> LoadOneLevel(const vector<string>& vs) {
         for (int j=0; j<N; j++)
             if (!visited[i][j])
                 level.lines[i][j] = '_';
+
+    // step 5: fill the corners,
+    // So that we go from this to this:
+    // __##__         _####_
+    // _#  #_  -----> _#  #_
+    // __##__         _####_
+    // step 4: replace any tile outside the wall with '_'
+    auto In = [M,N](int i, int j)->bool {
+        return i >= 0 && i < M && j >= 0 && j < N;
+    };
+    for (int i=0; i<M; i++)
+        for (int j=0; j<N; j++)
+            if (level.lines[i][j] == '_') {
+                bool fillIt = false;
+                fillIt |= (In(i-1,j-1) && level.lines[i-1][j-1] != '#' && level.lines[i-1][j-1] != '_');
+                fillIt |= (In(i-1,j+1) && level.lines[i-1][j+1] != '#' && level.lines[i-1][j+1] != '_');
+                fillIt |= (In(i+1,j-1) && level.lines[i+1][j-1] != '#' && level.lines[i+1][j-1] != '_');
+                fillIt |= (In(i+1,j+1) && level.lines[i+1][j+1] != '#' && level.lines[i+1][j+1] != '_');
+                if (fillIt) {
+                    level.lines[i][j] = '#';
+                }
+            }
+
     return {level};
 }
 
