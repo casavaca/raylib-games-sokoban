@@ -142,8 +142,6 @@ struct MyGuiButton {
 
 GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
 
-    // TODO: get rid of the magic numbers.
-    Rectangle   rects[]  = {{ 45, 115, 425, 60 }, { 45, 215, 425, 60 }, { 45, 315, 425, 60 }};
     int         numRects = 0;
 
     MyGuiButton nextLevelButton    { false, "Next Level (SPACE)" , KEY_SPACE, GuiEvent::EVENT_MENU_NEXT_LEVEL };
@@ -153,15 +151,21 @@ GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
     MyGuiButton restartButton      { false, "Restart (R)"        , KEY_R,     GuiEvent::EVENT_MENU_RESTART    };
     MyGuiButton quitButton         { false, "Quit (Q)"           , KEY_Q,     GuiEvent::EVENT_MENU_EXIT       };
 
-    auto CreateButton = [&rects, &numRects](const MyGuiButton& b)->bool{
+    auto CreateButton = [&numRects](const MyGuiButton& b) -> bool {
+        const float buttonX      =  45;
+        const float buttonY      = 115;
+        const float buttonDy     = 100;
+        const float buttonWidth  = 425;
+        const float buttonHeight =  60;
         GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+        Rectangle r {buttonX, buttonY + numRects * buttonDy, buttonWidth, buttonHeight};
         if (b.disabled) {
             GuiSetState(STATE_DISABLED);
-            GuiButton(rects[numRects++], b.text);
+            GuiButton(r, b.text);
             GuiSetState(STATE_NORMAL);
             return false;
         } else {
-            return (GuiButton(rects[numRects++], b.text) || IsKeyPressed(b.shortcutKey));
+            return (GuiButton(r, b.text) || IsKeyPressed(b.shortcutKey));
         }
     };
 
