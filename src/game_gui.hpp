@@ -20,8 +20,6 @@ struct GameResources {
     std::unordered_map<uint8_t, raylib::Texture> textures;
 };
 
-GameScene GetGameScene();
-void SetGameScene(GameScene newScene);
 void Init(GameResources* resourcePtr);
 
 // CookInputEvent just translates kbd/mouse event into GameEvent

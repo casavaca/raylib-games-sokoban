@@ -82,6 +82,8 @@ public:
     void Regret();
     bool IsLastLevel() const { return curLevel == levels.size() - 1; }
     void NextLevel() { curLevel++; Restart(); }
+    int  GetCurLevel() const { return curLevel; }
+    std::string GetCurLevelName() const { return levels[curLevel].name; }
     bool LevelCompleted() const { return numBoxes == numBoxesOnTarget; }
 private:
     bool LoadLevelFromFile(const char* levelFile);
