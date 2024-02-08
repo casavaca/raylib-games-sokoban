@@ -15,11 +15,25 @@ namespace GameGui {
 
 static GameScene scene = START_SCENE;
 
-GameScene GetGameScene() {
+static GameScene GetGameScene() {
     return scene;
 }
-void SetGameScene(GameScene newScene){
+void SetGameScene(GameScene newScene, const Sokoban& game) {
     scene = newScene;
+    // Set title
+    if (GetGameScene() == MAIN_GAME_SCENE) {
+        static std::string title; // probably need to be alive longer.
+        title.clear();
+        title += "level ";
+        title += to_string(game.GetCurLevel());
+        if (std::string levelName = game.GetCurLevelName(); levelName.size()) {
+            title += " ";
+            title += levelName;
+        }
+        SetWindowTitle(title.c_str());
+    } else {
+        SetWindowTitle("Sokoban");
+    }
 }
 
 void Init(GameResources* resourcePtr) {
@@ -142,8 +156,6 @@ struct MyGuiButton {
 
 GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
 
-    // TODO: get rid of the magic numbers.
-    Rectangle   rects[]  = {{ 45, 115, 425, 60 }, { 45, 215, 425, 60 }, { 45, 315, 425, 60 }};
     int         numRects = 0;
 
     MyGuiButton nextLevelButton    { false, "Next Level (SPACE)" , KEY_SPACE, GuiEvent::EVENT_MENU_NEXT_LEVEL };
@@ -153,15 +165,21 @@ GuiEvent Draw(raylib::Window& window, const Sokoban& game) {
     MyGuiButton restartButton      { false, "Restart (R)"        , KEY_R,     GuiEvent::EVENT_MENU_RESTART    };
     MyGuiButton quitButton         { false, "Quit (Q)"           , KEY_Q,     GuiEvent::EVENT_MENU_EXIT       };
 
-    auto CreateButton = [&rects, &numRects](const MyGuiButton& b)->bool{
+    auto CreateButton = [&numRects](const MyGuiButton& b) -> bool {
+        const float buttonX      =  45;
+        const float buttonY      =  15;
+        const float buttonDy     = 100;
+        const float buttonWidth  = 425;
+        const float buttonHeight =  60;
         GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+        Rectangle r {buttonX, buttonY + (++numRects) * buttonDy, buttonWidth, buttonHeight};
         if (b.disabled) {
             GuiSetState(STATE_DISABLED);
-            GuiButton(rects[numRects++], b.text);
+            GuiButton(r, b.text);
             GuiSetState(STATE_NORMAL);
             return false;
         } else {
-            return (GuiButton(rects[numRects++], b.text) || IsKeyPressed(b.shortcutKey));
+            return (GuiButton(r, b.text) || IsKeyPressed(b.shortcutKey));
         }
     };
 
@@ -207,23 +225,23 @@ bool ProcessGuiEvent(GuiEvent e, Sokoban& game) {
     bool shouldExit = false;
     switch (e) {
     case GuiEvent::EVENT_MENU_START: {
-        SetGameScene(MAIN_GAME_SCENE);
+        SetGameScene(MAIN_GAME_SCENE, game);
     } break;
     case GuiEvent::EVENT_MENU_EXIT: {
         shouldExit = true;
     } break;
     case GuiEvent::EVENT_MENU_RESTART: {
-        SetGameScene(MAIN_GAME_SCENE);
+        SetGameScene(MAIN_GAME_SCENE, game);
         game.Restart();
     } break;
     case GuiEvent::EVENT_MENU_PAUSE: {
         if (GetGameScene() == ESC_SCENE)
-            SetGameScene(MAIN_GAME_SCENE);
+            SetGameScene(MAIN_GAME_SCENE, game);
         else if (GetGameScene() == MAIN_GAME_SCENE)
-            SetGameScene(ESC_SCENE);
+            SetGameScene(ESC_SCENE, game);
     } break;
     case GuiEvent::EVENT_MENU_RESUME: {
-        SetGameScene(MAIN_GAME_SCENE);
+        SetGameScene(MAIN_GAME_SCENE, game);
     } break;
     case GuiEvent::EVENT_MENU_LEVEL_FINISHED: {
         // Ignore the event (which will be issued again) if
@@ -235,12 +253,12 @@ bool ProcessGuiEvent(GuiEvent e, Sokoban& game) {
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) ||
             IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
             break;
-        SetGameScene(LEVEL_FINISHED_SCENE);
+        SetGameScene(LEVEL_FINISHED_SCENE, game);
     } break;
     case GuiEvent::EVENT_MENU_NEXT_LEVEL: {
-        SetGameScene(MAIN_GAME_SCENE);
         assert(!game.IsLastLevel());
         game.NextLevel();
+        SetGameScene(MAIN_GAME_SCENE, game);
     } break;
     case GuiEvent::EVENT_NULL:
         break;

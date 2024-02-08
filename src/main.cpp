@@ -15,12 +15,17 @@ using namespace std;
 int main(int argc, char** argv) {
 
     CLI::App app{"Sokoban"};
-    string raylibEventFile;
     int FPS = 60;
 #if defined(DEBUG) || defined(COVERAGE)
+    string raylibEventFile;
+    string levelFile;
     auto* option_record       = app.add_option("--record", raylibEventFile, "record input event");
-    [[maybe_unused]] auto* _1 = app.add_option("--replay", raylibEventFile, "replay events from file")
+    auto* option_replay       = app.add_option("--replay", raylibEventFile, "replay events from file")
                                         ->excludes(option_record);
+    [[maybe_unused]] auto* _1 = app.add_flag("--exit", "exit after rending first frame")
+                                        ->excludes(option_record)
+                                        ->excludes(option_replay);
+    [[maybe_unused]] auto* _3 = app.add_option("--level", levelFile, "load level from txt file");
 #endif
     [[maybe_unused]] auto* _2 = app.add_option("--fps",    FPS, "Set FPS (intended for testing only)")
                                         ->default_val(60);
@@ -51,6 +56,9 @@ int main(int argc, char** argv) {
     AutomationEventList     raylibEventList;
     if (app.count("--replay")) {
         raylibEventList = LoadAutomationEventList(raylibEventFile.c_str());
+    }
+    if (app.count("--level")) {
+        game.LoadLevels(levelFile.c_str());
     }
 #endif
 #if defined(DEBUG)
@@ -91,6 +99,9 @@ int main(int argc, char** argv) {
         // Replay input events
         //----------------------------------------------------------------------------------
 #if defined(DEBUG) || defined(COVERAGE)
+        if (app.count("--exit")) {
+            break;
+        }
         if (app.count("--replay")) {
             static int current_frame = 0;
             if (raylibEventList.count == 0)

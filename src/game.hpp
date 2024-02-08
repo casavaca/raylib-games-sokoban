@@ -42,14 +42,17 @@ enum TileType : uint8_t {
     TILE_PLAYER_W_ON_TARGET = (TILE_TARGET | TILE_PLAYER_W),
 };
 
+static constexpr const char* ALLOWED_CHARACTERS = " #$@*._+";
+
 class Sokoban {
 public:
 
     struct Pos {
         int row,col;
-        bool operator==(const Sokoban::Pos& b) const noexcept {
-            return row == b.row && col == b.col;
-        }
+        bool operator==(const Pos& b) const noexcept { return row == b.row && col == b.col;  }
+        Pos operator+(const Pos& rhs) const noexcept { return Pos{row+rhs.row, col+rhs.col}; }
+        Pos operator-(const Pos& rhs) const noexcept { return Pos{row-rhs.row, col-rhs.col}; }
+        Pos operator-()               const noexcept { return Pos{-row, -col}; }
     };
     struct PosHash {
         int64_t operator()(const Pos& p) const noexcept {
@@ -63,6 +66,7 @@ public:
 
     using State = std::vector<std::vector<TileType>>;
 public:
+    bool LoadLevels(const char* levelFile);
     bool LoadLevel(const Level& lines);
     void LoadDefaultLevels();
     int  LoadLevelsFromTxt();
@@ -78,8 +82,11 @@ public:
     void Regret();
     bool IsLastLevel() const { return curLevel == levels.size() - 1; }
     void NextLevel() { curLevel++; Restart(); }
+    int  GetCurLevel() const { return curLevel; }
+    std::string GetCurLevelName() const { return levels[curLevel].name; }
     bool LevelCompleted() const { return numBoxes == numBoxesOnTarget; }
 private:
+    bool LoadLevelFromFile(const char* levelFile);
     void Pull(Pos LastPlayerPos, Pos dp);
     const TileType& Get(Pos p) const {return state[p.row][p.col]; }
     TileType& Get(Pos p) {return state[p.row][p.col]; }
